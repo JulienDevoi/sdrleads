@@ -25,9 +25,14 @@ export class LeadsService {
         industry: lead.industry || 'Unknown',
         status: lead.status,
         source: lead.source,
-
-
         notes: lead.notes || '',
+        photo_url: lead.photo_url,
+        linkedin_url: lead.linkedin_url,
+        title: lead.title,
+        organizationLogoUrl: lead.organizationLogoUrl,
+        organizationEstimatedNumEmployees: lead.organizationEstimatedNumEmployees,
+        organizationWebsiteUrl: lead.organizationWebsiteUrl,
+        organizationLinkedinUrl: lead.organizationLinkedinUrl,
         createdAt: new Date(lead.created_at),
         updatedAt: new Date(lead.updated_at)
       }))

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Filter, Download, Eye, Edit } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 
 interface LeadsTableProps {
   leads: Lead[]
+  onLeadUpdate?: (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched') => void
 }
 
 const statusColors = {
@@ -24,13 +25,59 @@ const statusLabels = {
   enriched: 'Enriched',
 }
 
-export function LeadsTable({ leads }: LeadsTableProps) {
+export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
+  const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
+  const [showFilters, setShowFilters] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched'>('all')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'>('all')
+  
   const itemsPerPage = 50
-  const totalPages = Math.ceil(leads.length / itemsPerPage)
+  
+  // Apply filters
+  const filteredLeads = leads.filter(lead => {
+    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
+    const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter
+    return matchesStatus && matchesSource
+  })
+  
+  const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentLeads = leads.slice(startIndex, endIndex)
+  const currentLeads = filteredLeads.slice(startIndex, endIndex)
+  
+  // Reset to page 1 when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1)
+  }
+
+  const handleStatusUpdate = async (leadId: string, newStatus: 'verified' | 'enriched') => {
+    setUpdatingLeads(prev => new Set([...prev, leadId]))
+    
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        onLeadUpdate?.(leadId, newStatus)
+      } else {
+        console.error('Failed to update lead status')
+      }
+    } catch (error) {
+      console.error('Error updating lead status:', error)
+    } finally {
+      setUpdatingLeads(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(leadId)
+        return newSet
+      })
+    }
+  }
 
   return (
     <Card>
@@ -41,17 +88,92 @@ export function LeadsTable({ leads }: LeadsTableProps) {
             <CardDescription>Latest leads added to your database</CardDescription>
           </div>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className={showFilters ? 'bg-muted' : ''}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filter
+              <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
-            <Button variant="secondary" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export
+            <Button 
+              variant="default" 
+              size="sm"
+              disabled={true}
+              className="opacity-60"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              Source new leads
             </Button>
           </div>
         </div>
       </CardHeader>
+      
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="px-6 py-4 border-b bg-muted/30">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-muted-foreground">Status:</label>
+              <select 
+                value={statusFilter} 
+                onChange={(e) => {
+                  setStatusFilter(e.target.value as any)
+                  handleFilterChange()
+                }}
+                className="px-3 py-1 text-sm border rounded-md bg-background"
+              >
+                <option value="all">All Statuses</option>
+                <option value="sourced">Sourced</option>
+                <option value="verified">Verified</option>
+                <option value="enriched">Enriched</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-muted-foreground">Source:</label>
+              <select 
+                value={sourceFilter} 
+                onChange={(e) => {
+                  setSourceFilter(e.target.value as any)
+                  handleFilterChange()
+                }}
+                className="px-3 py-1 text-sm border rounded-md bg-background"
+              >
+                <option value="all">All Sources</option>
+                <option value="website">Website</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="referral">Referral</option>
+                <option value="cold-call">Cold Call</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+            
+            {(statusFilter !== 'all' || sourceFilter !== 'all') && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  setStatusFilter('all')
+                  setSourceFilter('all')
+                  handleFilterChange()
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear Filters
+              </Button>
+            )}
+            
+            <div className="text-sm text-muted-foreground ml-auto">
+              Showing {filteredLeads.length} of {leads.length} leads
+            </div>
+          </div>
+        </div>
+      )}
+      
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -70,9 +192,6 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                   Source
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Date Added
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -82,20 +201,99 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                 <tr key={lead.id} className="hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                      {lead.photo_url ? (
+                        <img 
+                          src={lead.photo_url} 
+                          alt={lead.name}
+                          className="w-8 h-8 rounded-full mr-3 object-cover"
+                          onError={(e) => {
+                            // Fallback to initials if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3 ${lead.photo_url ? 'hidden' : ''}`}>
                         <span className="text-sm font-medium text-primary">
                           {getInitials(lead.name)}
                         </span>
                       </div>
                       <div>
-                        <div className="text-sm font-medium">{lead.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{lead.name}</span>
+                          {lead.linkedin_url && (
+                            <a 
+                              href={lead.linkedin_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              <Linkedin className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                        {lead.title && (
+                          <div className="text-sm text-muted-foreground">{lead.title}</div>
+                        )}
                         <div className="text-sm text-muted-foreground">{lead.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium">{lead.company}</div>
-                    <div className="text-sm text-muted-foreground">{lead.industry}</div>
+                    <div className="flex items-center">
+                      {lead.organizationLogoUrl ? (
+                        <img 
+                          src={lead.organizationLogoUrl} 
+                          alt={`${lead.company} logo`}
+                          className="w-8 h-8 rounded mr-3 object-contain bg-gray-50"
+                          onError={(e) => {
+                            // Fallback to company initials if logo fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 bg-muted/50 rounded flex items-center justify-center mr-3 text-xs font-medium ${lead.organizationLogoUrl ? 'hidden' : ''}`}>
+                        {getInitials(lead.company)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{lead.company}</span>
+                          {lead.organizationWebsiteUrl && (
+                            <a 
+                              href={lead.organizationWebsiteUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-gray-600 hover:text-gray-800 transition-colors"
+                              title="Visit company website"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                          {lead.organizationLinkedinUrl && (
+                            <a 
+                              href={lead.organizationLinkedinUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                              title="View company LinkedIn"
+                            >
+                              <Linkedin className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">{lead.industry}</div>
+                        {lead.organizationEstimatedNumEmployees && (
+                          <div className="text-sm text-muted-foreground">
+                            {lead.organizationEstimatedNumEmployees.toLocaleString()} employees
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -110,18 +308,27 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
                     {lead.source.replace('-', ' ')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {formatDate(lead.createdAt)}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        disabled={lead.status === 'verified' || lead.status === 'enriched' || updatingLeads.has(lead.id)}
+                        onClick={() => handleStatusUpdate(lead.id, 'verified')}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        {updatingLeads.has(lead.id) ? 'Verifying...' : 'Verify'}
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        disabled={lead.status === 'sourced' || lead.status === 'enriched' || updatingLeads.has(lead.id)}
+                        onClick={() => handleStatusUpdate(lead.id, 'enriched')}
+                      >
+                        <Star className="w-4 h-4 mr-1" />
+                        {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
                       </Button>
                     </div>
                   </td>

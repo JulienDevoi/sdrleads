@@ -4,12 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
-  LayoutDashboard, 
   Users, 
-  Phone, 
-  Calendar, 
-  BarChart3, 
-  Settings, 
+  Search,
   Menu, 
   X, 
   Zap,
@@ -20,12 +16,8 @@ import { Button } from '@/components/ui/button'
 import { mockUser } from '@/lib/mock-data'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Leads', href: '/leads', icon: Users },
-  { name: 'Contacts', href: '/contacts', icon: Phone },
-  { name: 'Activities', href: '/activities', icon: Calendar },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Leads', href: '/', icon: Users },
+  { name: 'Sourcing', href: '/sourcing', icon: Search },
 ]
 
 interface SidebarProps {

@@ -7,6 +7,13 @@ export interface Lead {
   status: 'sourced' | 'verified' | 'enriched'
   source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
   notes?: string
+  photo_url?: string
+  linkedin_url?: string
+  title?: string
+  organizationLogoUrl?: string
+  organizationEstimatedNumEmployees?: number
+  organizationWebsiteUrl?: string
+  organizationLinkedinUrl?: string
   createdAt: Date
   updatedAt: Date
 }
