@@ -26,7 +26,7 @@ const statusLabels = {
 
 export function LeadsTable({ leads }: LeadsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
+  const itemsPerPage = 50
   const totalPages = Math.ceil(leads.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
@@ -146,20 +146,85 @@ export function LeadsTable({ leads }: LeadsTableProps) {
               >
                 Previous
               </Button>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const page = i + 1
-                return (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className="w-8 h-8 p-0"
-                  >
-                    {page}
-                  </Button>
-                )
-              })}
+{(() => {
+                const maxVisiblePages = 7
+                const pages = []
+                
+                if (totalPages <= maxVisiblePages) {
+                  // Show all pages if total is small
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(
+                      <Button
+                        key={i}
+                        variant={currentPage === i ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(i)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {i}
+                      </Button>
+                    )
+                  }
+                } else {
+                  // Always show first page
+                  pages.push(
+                    <Button
+                      key={1}
+                      variant={currentPage === 1 ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(1)}
+                      className="w-8 h-8 p-0"
+                    >
+                      1
+                    </Button>
+                  )
+                  
+                  // Show ellipsis if needed
+                  if (currentPage > 4) {
+                    pages.push(<span key="ellipsis1" className="px-2">...</span>)
+                  }
+                  
+                  // Show pages around current page
+                  const start = Math.max(2, currentPage - 1)
+                  const end = Math.min(totalPages - 1, currentPage + 1)
+                  
+                  for (let i = start; i <= end; i++) {
+                    pages.push(
+                      <Button
+                        key={i}
+                        variant={currentPage === i ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(i)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {i}
+                      </Button>
+                    )
+                  }
+                  
+                  // Show ellipsis if needed
+                  if (currentPage < totalPages - 3) {
+                    pages.push(<span key="ellipsis2" className="px-2">...</span>)
+                  }
+                  
+                  // Always show last page
+                  if (totalPages > 1) {
+                    pages.push(
+                      <Button
+                        key={totalPages}
+                        variant={currentPage === totalPages ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {totalPages}
+                      </Button>
+                    )
+                  }
+                }
+                
+                return pages
+              })()}
               <Button
                 variant="outline"
                 size="sm"

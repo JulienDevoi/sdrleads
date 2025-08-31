@@ -1,10 +1,32 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
-import { EnhancedLeadsTable } from '@/components/leads/enhanced-leads-table'
+import { LeadsTable } from '@/components/dashboard/leads-table'
 import { LeadsStats } from '@/components/leads/leads-stats'
-import { mockLeads } from '@/lib/mock-data'
+import { Lead } from '@/types'
 
 export default function LeadsPage() {
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        const response = await fetch('/api/leads')
+        const data = await response.json()
+        setLeads(data)
+      } catch (error) {
+        console.error('Error fetching leads:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLeads()
+  }, [])
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
@@ -17,10 +39,10 @@ export default function LeadsPage() {
         
         <main className="p-4 sm:p-6 space-y-6">
           {/* Quick Stats */}
-          <LeadsStats leads={mockLeads} />
+          <LeadsStats leads={leads} />
           
-          {/* Enhanced Leads Table */}
-          <EnhancedLeadsTable leads={mockLeads} />
+          {/* Leads Table */}
+          <LeadsTable leads={leads} />
         </main>
       </div>
     </div>

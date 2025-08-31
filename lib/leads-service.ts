@@ -1,10 +1,10 @@
-import { supabase } from './supabase'
+import { supabase, supabaseAdmin } from './supabase'
 import { Lead } from '@/types'
 
 export class LeadsService {
   static async getAllLeads(): Promise<Lead[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
@@ -14,6 +14,8 @@ export class LeadsService {
         throw error
       }
 
+      console.log(`Found ${data.length} leads`)
+      
       // Transform the data to match our Lead interface
       return data.map(lead => ({
         id: lead.id,
@@ -169,7 +171,7 @@ export class LeadsService {
 
   static async getLeadsStats() {
     try {
-      const { data: leads, error } = await supabase
+      const { data: leads, error } = await supabaseAdmin
         .from('leads')
         .select('status')
 
