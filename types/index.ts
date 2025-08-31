@@ -1,0 +1,35 @@
+export interface Lead {
+  id: string
+  name: string
+  email: string
+  company: string
+  industry: string
+  status: 'new' | 'qualified' | 'cold' | 'converted'
+  source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
+  phone?: string
+  notes?: string
+  value?: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface DashboardStats {
+  totalLeads: number
+  qualifiedLeads: number
+  conversionRate: number
+  revenue: number
+  growthMetrics: {
+    totalLeadsGrowth: number
+    qualifiedLeadsGrowth: number
+    conversionRateGrowth: number
+    revenueGrowth: number
+  }
+}
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'user'
+  avatar?: string
+}
