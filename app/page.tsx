@@ -83,14 +83,14 @@ export default function HomePage() {
                 iconColor="bg-blue-500"
               />
               <StatsCard
-                title="Qualified Leads"
+                title="Verified Leads"
                 value={stats.qualifiedLeads.toLocaleString()}
                 change={stats.growthMetrics.qualifiedLeadsGrowth}
                 icon={<Target className="w-6 h-6 text-white" />}
                 iconColor="bg-green-500"
               />
               <StatsCard
-                title="Conversion Rate"
+                title="Enrichment Rate"
                 value={`${stats.conversionRate}%`}
                 change={stats.growthMetrics.conversionRateGrowth}
                 icon={<TrendingUp className="w-6 h-6 text-white" />}
@@ -147,20 +147,20 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold mb-4">Pipeline Overview</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">New Leads</span>
-                  <span className="font-medium">247</span>
+                  <span className="text-sm text-muted-foreground">Sourced</span>
+                  <span className="font-medium">{leads.filter(l => l.status === 'sourced').length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Qualified</span>
-                  <span className="font-medium">342</span>
+                  <span className="text-sm text-muted-foreground">Verified</span>
+                  <span className="font-medium">{leads.filter(l => l.status === 'verified').length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">In Progress</span>
-                  <span className="font-medium">158</span>
+                  <span className="text-sm text-muted-foreground">Enriched</span>
+                  <span className="font-medium">{leads.filter(l => l.status === 'enriched').length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Converted</span>
-                  <span className="font-medium">89</span>
+                  <span className="text-sm text-muted-foreground">Total Value</span>
+                  <span className="font-medium">${stats.revenue.toLocaleString()}</span>
                 </div>
               </div>
             </div>

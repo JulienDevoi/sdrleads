@@ -23,7 +23,7 @@ export class LeadsService {
         industry: lead.industry || 'Unknown',
         status: lead.status,
         source: lead.source,
-        phone: lead.phone,
+
         value: lead.value || 0,
         notes: lead.notes || '',
         createdAt: new Date(lead.created_at),
@@ -56,7 +56,7 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-        phone: data.phone,
+
         value: data.value || 0,
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
@@ -79,7 +79,7 @@ export class LeadsService {
           industry: leadData.industry,
           status: leadData.status,
           source: leadData.source,
-          phone: leadData.phone,
+
           value: leadData.value,
           notes: leadData.notes
         }])
@@ -99,7 +99,7 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-        phone: data.phone,
+
         value: data.value || 0,
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
@@ -136,7 +136,7 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-        phone: data.phone,
+
         value: data.value || 0,
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
@@ -179,18 +179,18 @@ export class LeadsService {
       }
 
       const totalLeads = leads.length
-      const qualifiedLeads = leads.filter(lead => lead.status === 'qualified').length
-      const convertedLeads = leads.filter(lead => lead.status === 'converted').length
+      const verifiedLeads = leads.filter(lead => lead.status === 'verified').length
+      const enrichedLeads = leads.filter(lead => lead.status === 'enriched').length
       const totalRevenue = leads
-        .filter(lead => lead.status === 'converted')
+        .filter(lead => lead.status === 'enriched')
         .reduce((sum, lead) => sum + (lead.value || 0), 0)
 
-      const conversionRate = totalLeads > 0 ? (convertedLeads / totalLeads) * 100 : 0
+      const enrichmentRate = totalLeads > 0 ? (enrichedLeads / totalLeads) * 100 : 0
 
       return {
         totalLeads,
-        qualifiedLeads,
-        conversionRate: Math.round(conversionRate * 10) / 10, // Round to 1 decimal
+        qualifiedLeads: verifiedLeads, // Using verified as qualified
+        conversionRate: enrichmentRate, // Using enrichment rate as conversion
         revenue: totalRevenue,
         growthMetrics: {
           totalLeadsGrowth: 0, // You can calculate this based on historical data

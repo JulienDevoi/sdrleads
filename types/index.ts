@@ -4,9 +4,8 @@ export interface Lead {
   email: string
   company: string
   industry: string
-  status: 'new' | 'qualified' | 'cold' | 'converted'
+  status: 'sourced' | 'verified' | 'enriched'
   source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
-  phone?: string
   notes?: string
   value?: number
   createdAt: Date
