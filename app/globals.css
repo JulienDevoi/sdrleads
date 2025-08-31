@@ -29,10 +29,10 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-200;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
   }
 }
 
@@ -42,19 +42,19 @@
   }
   
   .btn-primary {
-    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary;
+    @apply btn bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500;
   }
   
   .btn-secondary {
-    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary;
+    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus-visible:ring-gray-500;
   }
   
   .btn-ghost {
-    @apply btn hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent;
+    @apply btn hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-500;
   }
   
   .card {
-    @apply bg-card text-card-foreground rounded-xl shadow-sm border;
+    @apply bg-white text-gray-900 rounded-xl shadow-sm border border-gray-200;
   }
   
   .stat-card {
