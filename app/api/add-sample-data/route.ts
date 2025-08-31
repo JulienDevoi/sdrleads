@@ -9,7 +9,7 @@ const sampleLeads = [
     industry: 'Technology',
     status: 'sourced' as const,
     source: 'website' as const,
-    value: 15000,
+
     notes: 'Initial contact made through website form.'
   },
   {
@@ -19,7 +19,7 @@ const sampleLeads = [
     industry: 'SaaS',
     status: 'verified' as const,
     source: 'linkedin' as const,
-    value: 8500,
+
     notes: 'Verified contact information and company details.'
   },
   {
@@ -29,7 +29,7 @@ const sampleLeads = [
     industry: 'Manufacturing',
     status: 'enriched' as const,
     source: 'referral' as const,
-    value: 25000,
+
     notes: 'Fully enriched profile with complete company data.'
   },
   {
@@ -39,7 +39,7 @@ const sampleLeads = [
     industry: 'Consulting',
     status: 'verified' as const,
     source: 'cold-call' as const,
-    value: 12000,
+
     notes: 'Contact verified through phone call.'
   },
   {
@@ -49,7 +49,7 @@ const sampleLeads = [
     industry: 'Technology',
     status: 'sourced' as const,
     source: 'email' as const,
-    value: 18000,
+
     notes: 'Lead sourced from email campaign.'
   }
 ]

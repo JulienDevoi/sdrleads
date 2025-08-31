@@ -7,7 +7,6 @@ export interface Lead {
   status: 'sourced' | 'verified' | 'enriched'
   source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
   notes?: string
-  value?: number
   createdAt: Date
   updatedAt: Date
 }

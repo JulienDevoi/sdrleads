@@ -5,12 +5,26 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date)
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return 'N/A'
+  
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date'
+    }
+    
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(dateObj)
+  } catch (error) {
+    console.warn('Date formatting error:', error, 'for date:', date)
+    return 'Invalid Date'
+  }
 }
 
 export function formatCurrency(amount: number): string {

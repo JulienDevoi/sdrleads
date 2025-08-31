@@ -9,7 +9,7 @@ export const mockLeads: Lead[] = [
     industry: 'Technology',
     status: 'verified',
     source: 'website',
-    value: 15000,
+
     notes: 'Interested in enterprise solution. Follow up next week.',
     createdAt: new Date('2024-01-15T10:30:00'),
     updatedAt: new Date('2024-01-15T14:22:00'),
@@ -22,7 +22,7 @@ export const mockLeads: Lead[] = [
     industry: 'SaaS',
     status: 'sourced',
     source: 'linkedin',
-    value: 8500,
+
     notes: 'Reached out via LinkedIn. Scheduled demo for Friday.',
     createdAt: new Date('2024-01-15T09:15:00'),
     updatedAt: new Date('2024-01-15T09:15:00'),
@@ -35,7 +35,7 @@ export const mockLeads: Lead[] = [
     industry: 'Manufacturing',
     status: 'sourced',
     source: 'referral',
-    value: 25000,
+
     notes: 'Referred by existing client. Need to warm up relationship.',
     createdAt: new Date('2024-01-14T16:45:00'),
     updatedAt: new Date('2024-01-15T08:30:00'),
@@ -48,7 +48,7 @@ export const mockLeads: Lead[] = [
     industry: 'Technology',
     status: 'verified',
     source: 'cold-call',
-    value: 12000,
+
     notes: 'Very interested. Waiting for budget approval.',
     createdAt: new Date('2024-01-14T11:20:00'),
     updatedAt: new Date('2024-01-15T13:45:00'),
@@ -61,7 +61,7 @@ export const mockLeads: Lead[] = [
     industry: 'Consulting',
     status: 'enriched',
     source: 'email',
-    value: 18000,
+
     notes: 'Signed contract! Onboarding starts next month.',
     createdAt: new Date('2024-01-13T14:30:00'),
     updatedAt: new Date('2024-01-15T16:00:00'),

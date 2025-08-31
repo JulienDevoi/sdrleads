@@ -24,7 +24,7 @@ export class LeadsService {
         status: lead.status,
         source: lead.source,
 
-        value: lead.value || 0,
+
         notes: lead.notes || '',
         createdAt: new Date(lead.created_at),
         updatedAt: new Date(lead.updated_at)
@@ -57,7 +57,7 @@ export class LeadsService {
         status: data.status,
         source: data.source,
 
-        value: data.value || 0,
+
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
@@ -80,7 +80,7 @@ export class LeadsService {
           status: leadData.status,
           source: leadData.source,
 
-          value: leadData.value,
+
           notes: leadData.notes
         }])
         .select()
@@ -100,7 +100,7 @@ export class LeadsService {
         status: data.status,
         source: data.source,
 
-        value: data.value || 0,
+
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
@@ -137,7 +137,7 @@ export class LeadsService {
         status: data.status,
         source: data.source,
 
-        value: data.value || 0,
+
         notes: data.notes || '',
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
@@ -171,7 +171,7 @@ export class LeadsService {
     try {
       const { data: leads, error } = await supabase
         .from('leads')
-        .select('status, value')
+        .select('status')
 
       if (error) {
         console.error('Error fetching leads stats:', error)
@@ -181,9 +181,6 @@ export class LeadsService {
       const totalLeads = leads.length
       const verifiedLeads = leads.filter(lead => lead.status === 'verified').length
       const enrichedLeads = leads.filter(lead => lead.status === 'enriched').length
-      const totalRevenue = leads
-        .filter(lead => lead.status === 'enriched')
-        .reduce((sum, lead) => sum + (lead.value || 0), 0)
 
       const enrichmentRate = totalLeads > 0 ? (enrichedLeads / totalLeads) * 100 : 0
 
@@ -191,7 +188,7 @@ export class LeadsService {
         totalLeads,
         qualifiedLeads: verifiedLeads, // Using verified as qualified
         conversionRate: enrichmentRate, // Using enrichment rate as conversion
-        revenue: totalRevenue,
+        revenue: 0, // No longer using revenue
         growthMetrics: {
           totalLeadsGrowth: 0, // You can calculate this based on historical data
           qualifiedLeadsGrowth: 0,

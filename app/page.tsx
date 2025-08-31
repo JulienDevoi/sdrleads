@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Users, TrendingUp, DollarSign, Target } from 'lucide-react'
+import { Users, TrendingUp, Target } from 'lucide-react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { StatsCard } from '@/components/dashboard/stats-card'
@@ -74,7 +74,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <StatsCard
                 title="Total Leads"
                 value={stats.totalLeads.toLocaleString()}
@@ -95,13 +95,6 @@ export default function HomePage() {
                 change={stats.growthMetrics.conversionRateGrowth}
                 icon={<TrendingUp className="w-6 h-6 text-white" />}
                 iconColor="bg-purple-500"
-              />
-              <StatsCard
-                title="Revenue"
-                value={`$${(stats.revenue / 1000).toFixed(1)}K`}
-                change={stats.growthMetrics.revenueGrowth}
-                icon={<DollarSign className="w-6 h-6 text-white" />}
-                iconColor="bg-orange-500"
               />
             </div>
           )}
@@ -159,8 +152,8 @@ export default function HomePage() {
                   <span className="font-medium">{leads.filter(l => l.status === 'enriched').length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Value</span>
-                  <span className="font-medium">${stats.revenue.toLocaleString()}</span>
+                  <span className="text-sm text-muted-foreground">Total Leads</span>
+                  <span className="font-medium">{stats.totalLeads}</span>
                 </div>
               </div>
             </div>
