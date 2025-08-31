@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 interface LeadsTableProps {
   leads: Lead[]
   onLeadUpdate?: (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched') => void
+  onLeadDelete?: (leadId: string) => void
 }
 
 const statusColors = {
@@ -25,12 +26,14 @@ const statusLabels = {
   enriched: 'Enriched',
 }
 
-export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
+export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
+  const [deletingLeads, setDeletingLeads] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched'>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'>('all')
+  const [removingDuplicates, setRemovingDuplicates] = useState(false)
   
   const itemsPerPage = 50
   
@@ -83,6 +86,69 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     }
   }
 
+  const handleRejectLead = async (leadId: string) => {
+    if (!confirm('Are you sure you want to reject and delete this lead? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingLeads(prev => {
+      const newSet = new Set(prev)
+      newSet.add(leadId)
+      return newSet
+    })
+    
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        onLeadDelete?.(leadId)
+      } else {
+        console.error('Failed to delete lead')
+        alert('Failed to reject lead. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error)
+      alert('Error rejecting lead. Please try again.')
+    } finally {
+      setDeletingLeads(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(leadId)
+        return newSet
+      })
+    }
+  }
+
+  const handleRemoveDuplicates = async () => {
+    setRemovingDuplicates(true)
+    
+    try {
+      const response = await fetch('/api/leads/remove-duplicates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        alert(`Successfully removed ${result.duplicatesRemoved} duplicate leads!`)
+        // Refresh the page to show updated data
+        window.location.reload()
+      } else {
+        const error = await response.json()
+        console.error('Failed to remove duplicates:', error)
+        alert('Failed to remove duplicates. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error removing duplicates:', error)
+      alert('Error removing duplicates. Please try again.')
+    } finally {
+      setRemovingDuplicates(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -103,13 +169,14 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
               <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
             <Button 
-              variant="default" 
+              variant="outline" 
               size="sm"
-              disabled={true}
-              className="opacity-60"
+              onClick={handleRemoveDuplicates}
+              disabled={removingDuplicates}
+              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
             >
-              <Search className="w-4 h-4 mr-2" />
-              Source new leads
+              <UserX className="w-4 h-4 mr-2" />
+              {removingDuplicates ? 'Removing...' : 'Remove duplicates'}
             </Button>
           </div>
         </div>
@@ -190,10 +257,13 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
                   Company
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
+                  Source
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Source
+                  Rank
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Actions
@@ -299,6 +369,12 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
                       </div>
                     </div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
+                    {lead.source ? lead.source.replace('-', ' ') : 'Unknown'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {lead.rank || 'N/A'}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={cn(
@@ -309,31 +385,45 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
                       {statusLabels[lead.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
-                    {lead.source.replace('-', ' ')}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                        disabled={lead.status === 'verified' || lead.status === 'enriched' || updatingLeads.has(lead.id)}
-                        onClick={() => handleStatusUpdate(lead.id, 'verified')}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        {updatingLeads.has(lead.id) ? 'Verifying...' : 'Verify'}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        disabled={lead.status === 'sourced' || lead.status === 'enriched' || updatingLeads.has(lead.id)}
-                        onClick={() => handleStatusUpdate(lead.id, 'enriched')}
-                      >
-                        <Star className="w-4 h-4 mr-1" />
-                        {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
-                      </Button>
+                      {lead.status === 'sourced' ? (
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            disabled={updatingLeads.has(lead.id) || deletingLeads.has(lead.id)}
+                            onClick={() => handleStatusUpdate(lead.id, 'verified')}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            {updatingLeads.has(lead.id) ? 'Verifying...' : 'Verify'}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            disabled={updatingLeads.has(lead.id) || deletingLeads.has(lead.id)}
+                            onClick={() => handleRejectLead(lead.id)}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            {deletingLeads.has(lead.id) ? 'Rejecting...' : 'Reject'}
+                          </Button>
+                        </>
+                      ) : lead.status === 'verified' ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          disabled={updatingLeads.has(lead.id)}
+                          onClick={() => handleStatusUpdate(lead.id, 'enriched')}
+                        >
+                          <Star className="w-4 h-4 mr-1" />
+                          {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
+                        </Button>
+                      ) : lead.status === 'enriched' ? (
+                        <span className="text-sm text-muted-foreground">Complete</span>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

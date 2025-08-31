@@ -34,11 +34,16 @@ export function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
-export function getInitials(name: string): string {
+export function getInitials(name: string | null | undefined): string {
+  if (!name || typeof name !== 'string') {
+    return '??'
+  }
+  
   return name
+    .trim()
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2) || '??'
 }

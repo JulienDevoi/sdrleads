@@ -101,14 +101,16 @@ export function Sidebar({ className }: SidebarProps) {
           {/* User Profile */}
           <div className="p-4 border-t">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-primary-foreground">
-                  {mockUser.name.split(' ').map(n => n[0]).join('')}
-                </span>
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <img 
+                  src="/picture.jpg" 
+                  alt="Request Finance"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{mockUser.name}</p>
-                <p className="text-xs text-muted-foreground truncate capitalize">{mockUser.role}</p>
+                <p className="text-sm font-medium truncate">Request Finance</p>
+                <p className="text-xs text-muted-foreground truncate">Lead Generation</p>
               </div>
               <Button variant="ghost" size="sm">
                 <MoreHorizontal className="w-4 h-4" />

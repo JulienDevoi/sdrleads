@@ -37,3 +37,32 @@ export async function PATCH(
     )
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const leadId = params.id
+
+    const success = await LeadsService.deleteLead(leadId)
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to delete lead' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true, message: 'Lead deleted successfully' })
+  } catch (error) {
+    console.error('API Error - DELETE /api/leads/[id]:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to delete lead',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
+  }
+}

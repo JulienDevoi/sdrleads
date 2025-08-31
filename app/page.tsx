@@ -19,6 +19,12 @@ export default function HomePage() {
     )
   }
 
+  const handleLeadDelete = (leadId: string) => {
+    setLeads(prevLeads => 
+      prevLeads.filter(lead => lead.id !== leadId)
+    )
+  }
+
   useEffect(() => {
     const fetchLeads = async () => {
       try {
@@ -50,7 +56,7 @@ export default function HomePage() {
           <LeadsStats leads={leads} />
           
           {/* Leads Table */}
-          <LeadsTable leads={leads} onLeadUpdate={handleLeadUpdate} />
+          <LeadsTable leads={leads} onLeadUpdate={handleLeadUpdate} onLeadDelete={handleLeadDelete} />
         </main>
       </div>
     </div>

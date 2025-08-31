@@ -24,7 +24,7 @@ interface EnhancedLeadsTableProps {
   leads: Lead[]
 }
 
-type SortField = 'name' | 'company' | 'status' | 'createdAt'
+type SortField = 'name' | 'company' | 'status' | 'rank' | 'createdAt'
 type SortDirection = 'asc' | 'desc'
 type StatusFilter = 'all' | 'sourced' | 'verified' | 'enriched'
 type SourceFilter = 'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
@@ -221,6 +221,15 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                 </th>
                 <th className="px-6 py-3 text-left">
                   <button
+                    onClick={() => handleSort('rank')}
+                    className="flex items-center space-x-1 text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                  >
+                    <span>Rank</span>
+                    <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </th>
+                <th className="px-6 py-3 text-left">
+                  <button
                     onClick={() => handleSort('createdAt')}
                     className="flex items-center space-x-1 text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground"
                   >
@@ -266,6 +275,9 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
                     {lead.source.replace('-', ' ')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {lead.rank || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {formatDate(lead.createdAt)}
