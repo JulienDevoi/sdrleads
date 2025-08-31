@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { mockLeads } from '@/lib/mock-data'
+import { LeadsService } from '@/lib/leads-service'
 
 export async function GET() {
   try {
-    // In a real app, this would fetch from your database
-    return NextResponse.json(mockLeads)
+    const leads = await LeadsService.getAllLeads()
+    return NextResponse.json(leads)
   } catch (error) {
+    console.error('API Error - GET /api/leads:', error)
     return NextResponse.json(
       { error: 'Failed to fetch leads' },
       { status: 500 }
@@ -17,16 +18,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    // In a real app, this would save to your database
-    const newLead = {
-      id: String(mockLeads.length + 1),
-      ...body,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const newLead = await LeadsService.createLead(body)
+    
+    if (!newLead) {
+      return NextResponse.json(
+        { error: 'Failed to create lead' },
+        { status: 500 }
+      )
     }
     
     return NextResponse.json(newLead, { status: 201 })
   } catch (error) {
+    console.error('API Error - POST /api/leads:', error)
     return NextResponse.json(
       { error: 'Failed to create lead' },
       { status: 500 }
