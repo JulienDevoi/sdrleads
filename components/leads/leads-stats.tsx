@@ -1,4 +1,4 @@
-import { Users, CheckCircle, Clock, UserX } from 'lucide-react'
+import { Users, CheckCircle, Clock, Star } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Lead } from '@/types'
 
@@ -9,10 +9,9 @@ interface LeadsStatsProps {
 export function LeadsStats({ leads }: LeadsStatsProps) {
   const stats = {
     total: leads.length,
-    new: leads.filter(lead => lead.status === 'new').length,
-    qualified: leads.filter(lead => lead.status === 'qualified').length,
-    cold: leads.filter(lead => lead.status === 'cold').length,
-    converted: leads.filter(lead => lead.status === 'converted').length,
+    sourced: leads.filter(lead => lead.status === 'sourced').length,
+    verified: leads.filter(lead => lead.status === 'verified').length,
+    enriched: leads.filter(lead => lead.status === 'enriched').length,
   }
 
   const statCards = [
@@ -24,25 +23,25 @@ export function LeadsStats({ leads }: LeadsStatsProps) {
       color: 'text-blue-600'
     },
     {
-      title: 'New Leads',
-      value: stats.new,
+      title: 'Sourced',
+      value: stats.sourced,
       icon: <Clock className="w-5 h-5 text-yellow-600" />,
       iconColor: 'bg-yellow-100',
       color: 'text-yellow-600'
     },
     {
-      title: 'Qualified',
-      value: stats.qualified,
+      title: 'Verified',
+      value: stats.verified,
       icon: <CheckCircle className="w-5 h-5 text-green-600" />,
       iconColor: 'bg-green-100',
       color: 'text-green-600'
     },
     {
-      title: 'Cold Leads',
-      value: stats.cold,
-      icon: <UserX className="w-5 h-5 text-red-600" />,
-      iconColor: 'bg-red-100',
-      color: 'text-red-600'
+      title: 'Enriched',
+      value: stats.enriched,
+      icon: <Star className="w-5 h-5 text-purple-600" />,
+      iconColor: 'bg-purple-100',
+      color: 'text-purple-600'
     },
   ]
 
