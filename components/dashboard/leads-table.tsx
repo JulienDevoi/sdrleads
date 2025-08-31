@@ -52,7 +52,11 @@ export function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   }
 
   const handleStatusUpdate = async (leadId: string, newStatus: 'verified' | 'enriched') => {
-    setUpdatingLeads(prev => new Set([...prev, leadId]))
+    setUpdatingLeads(prev => {
+      const newSet = new Set(prev)
+      newSet.add(leadId)
+      return newSet
+    })
     
     try {
       const response = await fetch(`/api/leads/${leadId}`, {
