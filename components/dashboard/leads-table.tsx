@@ -37,6 +37,9 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   
   const itemsPerPage = 50
   
+  // Get unique sources from leads data
+  const availableSources = Array.from(new Set(leads.map(lead => lead.source).filter(Boolean))).sort()
+  
   // Apply filters
   const filteredLeads = leads.filter(lead => {
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
@@ -214,11 +217,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                 className="px-3 py-1 text-sm border rounded-md bg-background"
               >
                 <option value="all">All Sources</option>
-                <option value="website">Website</option>
-                <option value="linkedin">LinkedIn</option>
-                <option value="referral">Referral</option>
-                <option value="cold-call">Cold Call</option>
-                <option value="email">Email</option>
+                {availableSources.map(source => (
+                  <option key={source} value={source}>
+                    {source.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </option>
+                ))}
               </select>
             </div>
             

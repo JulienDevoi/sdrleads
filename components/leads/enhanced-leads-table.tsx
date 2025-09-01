@@ -50,6 +50,12 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(50)
 
+  // Get unique sources from leads data
+  const availableSources = useMemo(() => 
+    Array.from(new Set(leads.map(lead => lead.source).filter(Boolean))).sort(),
+    [leads]
+  )
+
   // Filter and sort leads
   const filteredAndSortedLeads = useMemo(() => {
     let filtered = leads.filter(lead => {
@@ -166,11 +172,11 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
               className="appearance-none bg-background border border-input rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
               <option value="all">All Sources</option>
-              <option value="website">Website</option>
-              <option value="linkedin">LinkedIn</option>
-              <option value="referral">Referral</option>
-              <option value="cold-call">Cold Call</option>
-              <option value="email">Email</option>
+              {availableSources.map(source => (
+                <option key={source} value={source}>
+                  {source.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                </option>
+              ))}
             </select>
             <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
