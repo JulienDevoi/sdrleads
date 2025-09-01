@@ -7,6 +7,8 @@ export interface Lead {
   status: 'sourced' | 'verified' | 'enriched'
   source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
   rank?: string
+  country?: string
+  city?: string
   notes?: string
   photo_url?: string
   linkedin_url?: string

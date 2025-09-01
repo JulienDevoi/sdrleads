@@ -25,6 +25,9 @@ export class LeadsService {
         industry: lead.industry || 'Unknown',
         status: lead.status,
         source: lead.source,
+        rank: lead.rank,
+        country: lead.country,
+        city: lead.city,
         notes: lead.notes || '',
         photo_url: lead.photo_url,
         linkedin_url: lead.linkedin_url,
@@ -63,9 +66,17 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-
-
+        rank: data.rank,
+        country: data.country,
+        city: data.city,
         notes: data.notes || '',
+        photo_url: data.photo_url,
+        linkedin_url: data.linkedin_url,
+        title: data.title,
+        organizationLogoUrl: data.organizationLogoUrl,
+        organizationEstimatedNumEmployees: data.organizationEstimatedNumEmployees,
+        organizationWebsiteUrl: data.organizationWebsiteUrl,
+        organizationLinkedinUrl: data.organizationLinkedinUrl,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }
@@ -86,9 +97,17 @@ export class LeadsService {
           industry: leadData.industry,
           status: leadData.status,
           source: leadData.source,
-
-
-          notes: leadData.notes
+          rank: leadData.rank,
+          country: leadData.country,
+          city: leadData.city,
+          notes: leadData.notes,
+          photo_url: leadData.photo_url,
+          linkedin_url: leadData.linkedin_url,
+          title: leadData.title,
+          organizationLogoUrl: leadData.organizationLogoUrl,
+          organizationEstimatedNumEmployees: leadData.organizationEstimatedNumEmployees,
+          organizationWebsiteUrl: leadData.organizationWebsiteUrl,
+          organizationLinkedinUrl: leadData.organizationLinkedinUrl
         }])
         .select()
         .single()
@@ -106,9 +125,17 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-
-
+        rank: data.rank,
+        country: data.country,
+        city: data.city,
         notes: data.notes || '',
+        photo_url: data.photo_url,
+        linkedin_url: data.linkedin_url,
+        title: data.title,
+        organizationLogoUrl: data.organizationLogoUrl,
+        organizationEstimatedNumEmployees: data.organizationEstimatedNumEmployees,
+        organizationWebsiteUrl: data.organizationWebsiteUrl,
+        organizationLinkedinUrl: data.organizationLinkedinUrl,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }
@@ -143,9 +170,17 @@ export class LeadsService {
         industry: data.industry || 'Unknown',
         status: data.status,
         source: data.source,
-
-
+        rank: data.rank,
+        country: data.country,
+        city: data.city,
         notes: data.notes || '',
+        photo_url: data.photo_url,
+        linkedin_url: data.linkedin_url,
+        title: data.title,
+        organizationLogoUrl: data.organizationLogoUrl,
+        organizationEstimatedNumEmployees: data.organizationEstimatedNumEmployees,
+        organizationWebsiteUrl: data.organizationWebsiteUrl,
+        organizationLinkedinUrl: data.organizationLinkedinUrl,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }

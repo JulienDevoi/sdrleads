@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -313,6 +313,17 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                         </div>
                         {lead.title && (
                           <div className="text-sm text-muted-foreground">{lead.title}</div>
+                        )}
+                        {(lead.city || lead.country) && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            <span>
+                              {lead.city && lead.country 
+                                ? `${lead.city}, ${lead.country}`
+                                : lead.city || lead.country
+                              }
+                            </span>
+                          </div>
                         )}
                         <div className="text-sm text-muted-foreground">{lead.email}</div>
                       </div>

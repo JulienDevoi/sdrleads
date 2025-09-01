@@ -12,7 +12,8 @@ import {
   Mail,
   MoreHorizontal,
   ArrowUpDown,
-  ChevronDown
+  ChevronDown,
+  MapPin
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -260,8 +261,21 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                       </div>
                       <div>
                         <div className="text-sm font-medium">{lead.name}</div>
+                        {lead.title && (
+                          <div className="text-sm text-muted-foreground">{lead.title}</div>
+                        )}
+                        {(lead.city || lead.country) && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            <span>
+                              {lead.city && lead.country 
+                                ? `${lead.city}, ${lead.country}`
+                                : lead.city || lead.country
+                              }
+                            </span>
+                          </div>
+                        )}
                         <div className="text-sm text-muted-foreground">{lead.email}</div>
-
                       </div>
                     </div>
                   </td>
