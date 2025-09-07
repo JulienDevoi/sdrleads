@@ -46,6 +46,11 @@ const statusLabels = {
 
 export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
+
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const [sortField, setSortField] = useState<SortField>('createdAt')
@@ -265,7 +270,9 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                       <div>
                         <div className="text-sm font-medium">{lead.name}</div>
                         {lead.title && (
-                          <div className="text-sm text-muted-foreground">{lead.title}</div>
+                          <div className="text-sm text-muted-foreground" title={lead.title}>
+                            {truncateText(lead.title, 25)}
+                          </div>
                         )}
                         {(lead.city || lead.country) && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -283,7 +290,9 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium">{lead.company}</div>
+                    <div className="text-sm font-medium" title={lead.company}>
+                      {truncateText(lead.company, 20)}
+                    </div>
                     <div className="text-sm text-muted-foreground">{lead.industry}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

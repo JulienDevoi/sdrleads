@@ -5,7 +5,7 @@ export interface Lead {
   company: string
   industry: string
   status: 'sourced' | 'verified' | 'enriched' | 'rejected'
-  source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
+  source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'
   rank?: string
   country?: string
   city?: string

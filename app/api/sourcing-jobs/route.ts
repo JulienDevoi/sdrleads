@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
       .from('sourcing_jobs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50) // Limit to last 50 jobs
+      .limit(5) // Limit to last 5 jobs for better performance
 
     if (error) {
       console.error('Error fetching sourcing jobs:', error)
@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
         progress: getProgressFromStatus(job.status),
         estimatedLeads: job.leads_found || 0,
         stats: {},
-        defaultDatasetId: job.dataset_id
+        defaultDatasetId: job.dataset_id,
+        resultsRetrieved: job.results_retrieved || false
       }
     }))
 

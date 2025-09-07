@@ -50,6 +50,29 @@ export default function SourcingPage() {
   const handleRemoveJob = (jobId: string) => {
     setActiveJobs(prev => prev.filter(job => job.jobId !== jobId))
   }
+
+  const handleRetrieveResults = async (jobId: string) => {
+    try {
+      const response = await fetch('/api/apollo-scraper/results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        alert(`Successfully retrieved ${result.leadsCount} leads!\n\nLeads have been stored in the database and are ready for integration.`)
+      } else {
+        alert(`Error retrieving results: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error retrieving results:', error)
+      alert('Failed to retrieve results. Please try again.')
+    }
+  }
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
@@ -105,6 +128,7 @@ export default function SourcingPage() {
               <JobProgressTracker 
                 jobs={activeJobs} 
                 onRemoveJob={handleRemoveJob}
+                onRetrieveResults={handleRetrieveResults}
               />
             )}
           </div>

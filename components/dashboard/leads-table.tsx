@@ -29,6 +29,11 @@ const statusLabels = {
 }
 
 export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProps) {
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
   const [currentPage, setCurrentPage] = useState(1)
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
@@ -318,7 +323,9 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                           )}
                         </div>
                         {lead.title && (
-                          <div className="text-sm text-muted-foreground">{lead.title}</div>
+                          <div className="text-sm text-muted-foreground" title={lead.title}>
+                            {truncateText(lead.title, 25)}
+                          </div>
                         )}
                         {(lead.city || lead.country) && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -356,7 +363,9 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{lead.company}</span>
+                          <span className="text-sm font-medium" title={lead.company}>
+                            {truncateText(lead.company, 20)}
+                          </span>
                           {lead.organizationWebsiteUrl && (
                             <a 
                               href={lead.organizationWebsiteUrl} 

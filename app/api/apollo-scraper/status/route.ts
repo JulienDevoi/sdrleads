@@ -83,7 +83,8 @@ export async function GET(request: NextRequest) {
       defaultDatasetId: run.defaultDatasetId,
       // Add progress estimation based on status
       progress: getProgressFromStatus(run.status),
-      estimatedLeads: leadsFound
+      estimatedLeads: leadsFound,
+      resultsRetrieved: false // Will be updated from database
     }
 
     // Update job status in database
@@ -104,6 +105,18 @@ export async function GET(request: NextRequest) {
 
     if (updateError) {
       console.error('Error updating job status in database:', updateError)
+    }
+
+    // Get the updated job info including results_retrieved flag
+    const { data: updatedJob } = await supabaseAdmin
+      .from('sourcing_jobs')
+      .select('results_retrieved')
+      .eq('job_id', jobId)
+      .single()
+
+    // Update the jobStatus with database info
+    if (updatedJob) {
+      jobStatus.resultsRetrieved = updatedJob.results_retrieved || false
     }
 
     return NextResponse.json({

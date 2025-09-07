@@ -14,6 +14,7 @@ interface JobStatus {
   estimatedLeads: number
   stats: any
   defaultDatasetId?: string
+  resultsRetrieved?: boolean
 }
 
 interface SourcingJob {
@@ -31,9 +32,10 @@ interface SourcingJob {
 interface JobProgressTrackerProps {
   jobs: SourcingJob[]
   onRemoveJob: (jobId: string) => void
+  onRetrieveResults?: (jobId: string) => void
 }
 
-export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProps) {
+export function JobProgressTracker({ jobs, onRemoveJob, onRetrieveResults }: JobProgressTrackerProps) {
   const [jobStatuses, setJobStatuses] = useState<Record<string, JobStatus>>({})
   const [isPolling, setIsPolling] = useState(false)
 
@@ -139,6 +141,11 @@ export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProp
     return `${seconds}s`
   }
 
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + '...'
+  }
+
   if (jobs.length === 0) {
     return (
       <Card>
@@ -152,7 +159,7 @@ export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProp
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Active Sourcing Jobs</h3>
+        <h3 className="text-lg font-semibold">Previous Sourcing Jobs</h3>
         {isPolling && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +182,7 @@ export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProp
                     {status?.status || 'PENDING'}
                   </div>
                   <CardTitle className="text-sm">
-                    {job.criteria.jobTitle} in {job.criteria.location}
+                    {truncateText(job.criteria.jobTitle, 20)} in {truncateText(job.criteria.location, 20)}
                   </CardTitle>
                 </div>
                 <Button
@@ -188,7 +195,7 @@ export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProp
                 </Button>
               </div>
               <CardDescription className="text-xs">
-                Keywords: {job.criteria.keywords} • Target: {job.criteria.numberOfLeads} leads
+                Keywords: {truncateText(job.criteria.keywords, 30)} • Target: {job.criteria.numberOfLeads} leads
               </CardDescription>
             </CardHeader>
             
@@ -225,6 +232,29 @@ export function JobProgressTracker({ jobs, onRemoveJob }: JobProgressTrackerProp
                       </span>
                     )}
                   </div>
+
+                  {/* Results Actions */}
+                  {status.status === 'SUCCEEDED' && status.estimatedLeads > 0 && onRetrieveResults && !status.resultsRetrieved && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => onRetrieveResults(job.jobId)}
+                        className="text-xs"
+                      >
+                        Retrieve Results ({status.estimatedLeads} leads)
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Results Retrieved Indicator */}
+                  {status.status === 'SUCCEEDED' && status.resultsRetrieved && (
+                    <div className="flex items-center gap-2 mt-3 text-xs text-green-600">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Results retrieved and saved to leads database</span>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
