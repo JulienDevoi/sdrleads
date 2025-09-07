@@ -11,7 +11,7 @@ export default function HomePage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
 
-  const handleLeadUpdate = (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched') => {
+  const handleLeadUpdate = (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched' | 'rejected') => {
     setLeads(prevLeads => 
       prevLeads.map(lead => 
         lead.id === leadId ? { ...lead, status: newStatus } : lead

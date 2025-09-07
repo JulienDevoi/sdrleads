@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 
 interface LeadsTableProps {
   leads: Lead[]
-  onLeadUpdate?: (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched') => void
+  onLeadUpdate?: (leadId: string, newStatus: 'sourced' | 'verified' | 'enriched' | 'rejected') => void
   onLeadDelete?: (leadId: string) => void
 }
 
@@ -18,20 +18,21 @@ const statusColors = {
   sourced: 'bg-yellow-100 text-yellow-800',
   verified: 'bg-green-100 text-green-800',
   enriched: 'bg-blue-100 text-blue-800',
+  rejected: 'bg-red-100 text-red-800',
 }
 
 const statusLabels = {
   sourced: 'Sourced',
   verified: 'Verified',
   enriched: 'Enriched',
+  rejected: 'Rejected',
 }
 
 export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
-  const [deletingLeads, setDeletingLeads] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'>('all')
   const [removingDuplicates, setRemovingDuplicates] = useState(false)
   
@@ -90,11 +91,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   }
 
   const handleRejectLead = async (leadId: string) => {
-    if (!confirm('Are you sure you want to reject and delete this lead? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to reject this lead?')) {
       return
     }
 
-    setDeletingLeads(prev => {
+    setUpdatingLeads(prev => {
       const newSet = new Set(prev)
       newSet.add(leadId)
       return newSet
@@ -102,20 +103,24 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
     
     try {
       const response = await fetch(`/api/leads/${leadId}`, {
-        method: 'DELETE',
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'rejected' }),
       })
 
       if (response.ok) {
-        onLeadDelete?.(leadId)
+        onLeadUpdate?.(leadId, 'rejected')
       } else {
-        console.error('Failed to delete lead')
+        console.error('Failed to reject lead')
         alert('Failed to reject lead. Please try again.')
       }
     } catch (error) {
-      console.error('Error deleting lead:', error)
+      console.error('Error rejecting lead:', error)
       alert('Error rejecting lead. Please try again.')
     } finally {
-      setDeletingLeads(prev => {
+      setUpdatingLeads(prev => {
         const newSet = new Set(prev)
         newSet.delete(leadId)
         return newSet
@@ -203,6 +208,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                 <option value="sourced">Sourced</option>
                 <option value="verified">Verified</option>
                 <option value="enriched">Enriched</option>
+                <option value="rejected">Rejected</option>
               </select>
             </div>
             
@@ -407,7 +413,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             variant="ghost" 
                             size="sm"
                             className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            disabled={updatingLeads.has(lead.id) || deletingLeads.has(lead.id)}
+                            disabled={updatingLeads.has(lead.id)}
                             onClick={() => handleStatusUpdate(lead.id, 'verified')}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
@@ -417,11 +423,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             variant="ghost" 
                             size="sm"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            disabled={updatingLeads.has(lead.id) || deletingLeads.has(lead.id)}
+                            disabled={updatingLeads.has(lead.id)}
                             onClick={() => handleRejectLead(lead.id)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
-                            {deletingLeads.has(lead.id) ? 'Rejecting...' : 'Reject'}
+                            {updatingLeads.has(lead.id) ? 'Rejecting...' : 'Reject'}
                           </Button>
                         </>
                       ) : lead.status === 'verified' ? (
@@ -437,6 +443,8 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                         </Button>
                       ) : lead.status === 'enriched' ? (
                         <span className="text-sm text-muted-foreground">Complete</span>
+                      ) : lead.status === 'rejected' ? (
+                        <span className="text-sm text-muted-foreground">Rejected</span>
                       ) : null}
                     </div>
                   </td>

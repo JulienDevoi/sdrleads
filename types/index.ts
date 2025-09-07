@@ -4,7 +4,7 @@ export interface Lead {
   email: string
   company: string
   industry: string
-  status: 'sourced' | 'verified' | 'enriched'
+  status: 'sourced' | 'verified' | 'enriched' | 'rejected'
   source: 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
   rank?: string
   country?: string

@@ -9,7 +9,7 @@ export async function PATCH(
     const { status } = await request.json()
     const leadId = params.id
 
-    if (!status || !['sourced', 'verified', 'enriched'].includes(status)) {
+    if (!status || !['sourced', 'verified', 'enriched', 'rejected'].includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status' },
         { status: 400 }
