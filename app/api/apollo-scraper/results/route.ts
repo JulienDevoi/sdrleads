@@ -76,13 +76,71 @@ export async function POST(request: NextRequest) {
 
     console.log(`Retrieved ${leads.length} leads from dataset`)
 
+    // Helper function to generate category based on job criteria
+    const generateCategory = (jobTitle: string, keywords: string, location: string) => {
+      const title = jobTitle.toLowerCase()
+      const keys = keywords ? keywords.toLowerCase() : ''
+      
+      // Technology/Software categories
+      if (title.includes('engineer') || title.includes('developer') || title.includes('tech') || keys.includes('saas') || keys.includes('software')) {
+        return 'Technology & Software'
+      }
+      
+      // Executive/Leadership categories
+      if (title.includes('ceo') || title.includes('cto') || title.includes('cfo') || title.includes('president') || title.includes('founder')) {
+        return 'Executive Leadership'
+      }
+      
+      // Marketing/Sales categories
+      if (title.includes('marketing') || title.includes('sales') || title.includes('business development')) {
+        return 'Marketing & Sales'
+      }
+      
+      // Finance categories
+      if (title.includes('finance') || title.includes('accounting') || title.includes('controller')) {
+        return 'Finance & Accounting'
+      }
+      
+      // Operations categories
+      if (title.includes('operations') || title.includes('manager') || title.includes('director')) {
+        return 'Operations & Management'
+      }
+      
+      // Industry-specific categories based on keywords
+      if (keys.includes('healthcare') || keys.includes('medical')) {
+        return 'Healthcare'
+      }
+      
+      if (keys.includes('fintech') || keys.includes('financial')) {
+        return 'Financial Services'
+      }
+      
+      if (keys.includes('crypto') || keys.includes('blockchain') || keys.includes('web3')) {
+        return 'Crypto & Blockchain'
+      }
+      
+      if (keys.includes('ecommerce') || keys.includes('retail')) {
+        return 'E-commerce & Retail'
+      }
+      
+      // Default category
+      if (location) {
+        return `${jobTitle} - ${location}`
+      } else {
+        return jobTitle
+      }
+    }
+
     // Transform Apollo leads to match your existing leads table structure
     const transformedLeads = leads.map(lead => ({
       // Basic info
       name: lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim(),
+      first_name: lead.first_name || null,
+      last_name: lead.last_name || null,
       email: lead.email,
       company: lead.organization_name || lead.organization?.name || '',
       industry: lead.industry || lead.organization?.industry || 'Unknown',
+      headline: lead.headline || null,
       
       // Set status and source for Apollo sourced leads
       status: 'sourced' as const,
@@ -90,6 +148,9 @@ export async function POST(request: NextRequest) {
       
       // Link to sourcing job
       sourcing_job_id: job.id,
+      
+      // Generate category based on job criteria
+      category: generateCategory(job.job_title, job.keywords, job.location),
       
       // Optional fields that map to your schema
       rank: 'N/A', // Default rank, not mapped from Apollo data

@@ -159,12 +159,12 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
 
             <div className="space-y-2">
               <label htmlFor="keywords" className="text-sm font-medium text-foreground">
-                Keywords
+                Keywords <span className="text-muted-foreground font-normal">(optional)</span>
               </label>
               <input
                 id="keywords"
                 type="text"
-                placeholder="e.g., SaaS, B2B, Enterprise, Technology"
+                placeholder="e.g., SaaS, B2B, Enterprise, Technology (optional)"
                 value={formData.keywords}
                 onChange={(e) => handleInputChange('keywords', e.target.value)}
                 className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
@@ -173,12 +173,12 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
 
             <div className="space-y-2">
               <label htmlFor="location" className="text-sm font-medium text-foreground">
-                Location
+                Location <span className="text-muted-foreground font-normal">(optional)</span>
               </label>
               <input
                 id="location"
                 type="text"
-                placeholder="e.g., San Francisco, New York, Remote"
+                placeholder="e.g., San Francisco, New York, Remote (optional)"
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
@@ -212,7 +212,7 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
             </Button>
             <Button 
               onClick={handleSubmit}
-              disabled={!formData.jobTitle.trim() || !formData.keywords.trim() || !formData.location.trim() || !formData.numberOfLeads}
+              disabled={!formData.jobTitle.trim() || !formData.numberOfLeads}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
               Start Sourcing New Leads

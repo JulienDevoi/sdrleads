@@ -28,7 +28,8 @@ interface EnhancedLeadsTableProps {
 type SortField = 'name' | 'company' | 'status' | 'rank' | 'createdAt'
 type SortDirection = 'asc' | 'desc'
 type StatusFilter = 'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'
-type SourceFilter = 'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'
+type SourceFilter = 'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'
+type CountryFilter = 'all' | string
 
 const statusColors = {
   sourced: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -53,6 +54,7 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
   }
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [countryFilter, setCountryFilter] = useState<CountryFilter>('all')
   const [sortField, setSortField] = useState<SortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [currentPage, setCurrentPage] = useState(1)
@@ -74,8 +76,9 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
       
       const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
       const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter
+      const matchesCountry = countryFilter === 'all' || lead.country === countryFilter
       
-      return matchesSearch && matchesStatus && matchesSource
+      return matchesSearch && matchesStatus && matchesSource && matchesCountry
     })
 
     // Sort leads
@@ -97,7 +100,7 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
     })
 
     return filtered
-  }, [leads, searchTerm, statusFilter, sourceFilter, sortField, sortDirection])
+  }, [leads, searchTerm, statusFilter, sourceFilter, countryFilter, sortField, sortDirection])
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedLeads.length / itemsPerPage)
@@ -114,10 +117,21 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
     }
   }
 
+  // Get unique countries for filter
+  const availableCountries = useMemo(() => {
+    const countries = leads
+      .map(lead => lead.country)
+      .filter(Boolean)
+      .filter((country, index, array) => array.indexOf(country) === index)
+      .sort()
+    return countries
+  }, [leads])
+
   const resetFilters = () => {
     setSearchTerm('')
     setStatusFilter('all')
     setSourceFilter('all')
+    setCountryFilter('all')
     setCurrentPage(1)
   }
 
@@ -190,8 +204,25 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
             <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
 
+          {/* Country Filter */}
+          <div className="relative">
+            <select
+              value={countryFilter}
+              onChange={(e) => setCountryFilter(e.target.value as CountryFilter)}
+              className="appearance-none bg-background border border-input rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            >
+              <option value="all">All Countries</option>
+              {availableCountries.map(country => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          </div>
+
           {/* Reset Filters */}
-          {(searchTerm || statusFilter !== 'all' || sourceFilter !== 'all') && (
+          {(searchTerm || statusFilter !== 'all' || sourceFilter !== 'all' || countryFilter !== 'all') && (
             <Button variant="outline" size="sm" onClick={resetFilters}>
               Reset
             </Button>

@@ -18,17 +18,17 @@ function constructApolloSearchUrl(jobTitle: string, keywords: string, location: 
   })
 
   // Add location if provided
-  if (location.trim()) {
-    params.append('personLocations[]', location)
+  if (location && location.trim()) {
+    params.append('personLocations[]', location.trim())
   }
 
-  // Add job title if provided
-  if (jobTitle.trim()) {
-    params.append('personTitles[]', jobTitle.toLowerCase())
+  // Add job title (required)
+  if (jobTitle && jobTitle.trim()) {
+    params.append('personTitles[]', jobTitle.toLowerCase().trim())
   }
 
   // Add keywords to organization search if provided
-  if (keywords.trim()) {
+  if (keywords && keywords.trim()) {
     // Split keywords by comma and add each as a separate parameter
     const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k)
     keywordList.forEach(keyword => {
@@ -45,9 +45,9 @@ export async function POST(request: NextRequest) {
     const { jobTitle, keywords, location, numberOfLeads } = body
 
     // Validate required fields
-    if (!jobTitle || !keywords || !location || !numberOfLeads) {
+    if (!jobTitle || !numberOfLeads) {
       return NextResponse.json(
-        { error: 'Missing required fields: jobTitle, keywords, location, numberOfLeads' },
+        { error: 'Missing required fields: jobTitle, numberOfLeads' },
         { status: 400 }
       )
     }

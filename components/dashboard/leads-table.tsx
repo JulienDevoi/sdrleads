@@ -38,7 +38,8 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'>('all')
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email'>('all')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'>('all')
+  const [countryFilter, setCountryFilter] = useState<'all' | string>('all')
   const [removingDuplicates, setRemovingDuplicates] = useState(false)
   
   const itemsPerPage = 50
@@ -46,11 +47,15 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   // Get unique sources from leads data
   const availableSources = Array.from(new Set(leads.map(lead => lead.source).filter(Boolean))).sort()
   
+  // Get unique countries from leads data
+  const availableCountries = Array.from(new Set(leads.map(lead => lead.country).filter(Boolean))).sort()
+  
   // Apply filters
   const filteredLeads = leads.filter(lead => {
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
     const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter
-    return matchesStatus && matchesSource
+    const matchesCountry = countryFilter === 'all' || lead.country === countryFilter
+    return matchesStatus && matchesSource && matchesCountry
   })
   
   const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
@@ -235,14 +240,34 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                 ))}
               </select>
             </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-muted-foreground">Country:</label>
+              <select 
+                value={countryFilter} 
+                onChange={(e) => {
+                  setCountryFilter(e.target.value)
+                  handleFilterChange()
+                }}
+                className="px-3 py-1 text-sm border rounded-md bg-background"
+              >
+                <option value="all">All Countries</option>
+                {availableCountries.map(country => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </div>
             
-            {(statusFilter !== 'all' || sourceFilter !== 'all') && (
+            {(statusFilter !== 'all' || sourceFilter !== 'all' || countryFilter !== 'all') && (
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => {
                   setStatusFilter('all')
                   setSourceFilter('all')
+                  setCountryFilter('all')
                   handleFilterChange()
                 }}
                 className="text-muted-foreground hover:text-foreground"
