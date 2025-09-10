@@ -761,7 +761,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
               Find Email Feature
             </h3>
             <p className="text-gray-600 mb-6">
-              This feature is coming soon! We're working on integrating email finding capabilities to help you discover contact information for your leads.
+              This feature is coming soon! We&apos;re working on integrating email finding capabilities to help you discover contact information for your leads.
             </p>
             <Button
               onClick={() => setShowComingSoonModal(false)}
