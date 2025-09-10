@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin, MoreHorizontal, Mail } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin, MoreHorizontal, Mail, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -46,6 +46,8 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const [removingDuplicates, setRemovingDuplicates] = useState(false)
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
+  const [showSlackModal, setShowSlackModal] = useState(false)
+  const [showSprintModal, setShowSprintModal] = useState(false)
   
   const itemsPerPage = 50
   
@@ -99,6 +101,16 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const handleFindEmail = (leadId: string) => {
     closeDropdown(leadId)
     setShowComingSoonModal(true)
+  }
+
+  const handleSlackAction = (leadId: string) => {
+    closeDropdown(leadId)
+    setShowSlackModal(true)
+  }
+
+  const handleSprintAction = (leadId: string) => {
+    closeDropdown(leadId)
+    setShowSprintModal(true)
   }
 
   const handleStatusUpdate = async (leadId: string, newStatus: 'verified' | 'enriched') => {
@@ -552,7 +564,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                                 className="fixed inset-0 z-10" 
                                 onClick={() => closeDropdown(lead.id)}
                               />
-                              <div className="absolute right-0 top-8 z-20 w-80 bg-white rounded-md shadow-lg border border-gray-200 py-1">
+                              <div className="absolute right-0 top-8 z-20 w-96 bg-white rounded-md shadow-lg border border-gray-200 py-1">
                                 {!lead.email && (
                                   <button
                                     onClick={() => handleFindEmail(lead.id)}
@@ -586,6 +598,29 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                                     </span>
                                   </div>
                                 )}
+                                
+                                {/* Coming Soon Actions */}
+                                <div className="border-t border-gray-200 my-1"></div>
+                                <button
+                                  onClick={() => handleSlackAction(lead.id)}
+                                  className="w-full text-left px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 flex items-start"
+                                >
+                                  <MessageSquare className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                                  <span className="leading-tight">
+                                    Send to Slack (coming soon)
+                                  </span>
+                                </button>
+                                <button
+                                  onClick={() => handleSprintAction(lead.id)}
+                                  className="w-full text-left px-4 py-3 text-sm text-gray-500 hover:bg-gray-50 flex items-start"
+                                >
+                                  <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                  </svg>
+                                  <span className="leading-tight break-words">
+                                    Send to Sprint 1 Campaign (coming soon)
+                                  </span>
+                                </button>
                               </div>
                             </>
                           )}
@@ -728,6 +763,58 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
             </p>
             <Button
               onClick={() => setShowComingSoonModal(false)}
+              className="w-full"
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Slack Coming Soon Modal */}
+    {showSlackModal && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-xl border max-w-md w-full mx-4 p-6">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Slack Integration
+            </h3>
+            <p className="text-gray-600 mb-6">
+              We&apos;re working on Slack integration to automatically notify your team when leads are ready for outreach. Stay tuned for this powerful collaboration feature!
+            </p>
+            <Button
+              onClick={() => setShowSlackModal(false)}
+              className="w-full"
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Sprint 1 Campaign Coming Soon Modal */}
+    {showSprintModal && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-xl border max-w-md w-full mx-4 p-6">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Sprint 1 Campaign
+            </h3>
+            <p className="text-gray-600 mb-6">
+              We&apos;re developing a specialized Sprint 1 campaign workflow for targeted lead nurturing. This will allow you to segment and send leads to specific campaign sequences based on your sprint planning.
+            </p>
+            <Button
+              onClick={() => setShowSprintModal(false)}
               className="w-full"
             >
               Got it
