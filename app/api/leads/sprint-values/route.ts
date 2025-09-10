@@ -20,11 +20,11 @@ export async function GET() {
     }
 
     // Get unique sprint values and filter out empty strings
-    const uniqueSprints = [...new Set(
+    const uniqueSprints = Array.from(new Set(
       data
         .map(item => item.Sprint)
         .filter(sprint => sprint && sprint.trim() !== '')
-    )].sort()
+    )).sort()
 
     console.log('Found unique sprint values:', uniqueSprints)
 
