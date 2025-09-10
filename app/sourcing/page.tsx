@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { AIAgentCard } from '@/components/sourcing/ai-agent-card'
 import { ManualLeadCard } from '@/components/sourcing/manual-lead-card'
+import { LinkedInPostCard } from '@/components/sourcing/linkedin-post-card'
 import { JobProgressTracker } from '@/components/sourcing/job-progress-tracker'
 
 interface SourcingJob {
@@ -53,6 +54,11 @@ export default function SourcingPage() {
     // TODO: Add any additional logic for handling manual lead addition
   }
 
+  const handlePostProcessed = (postUrl: string) => {
+    console.log('LinkedIn post processed:', postUrl)
+    // TODO: Add any additional logic for handling post processing
+  }
+
   const handleRemoveJob = (jobId: string) => {
     setActiveJobs(prev => prev.filter(job => job.jobId !== jobId))
   }
@@ -95,34 +101,7 @@ export default function SourcingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AIAgentCard onJobCreated={handleJobCreated} />
               <ManualLeadCard onLeadAdded={handleLeadAdded} />
-              
-              {/* Placeholder for future sourcing tools */}
-              <div className="col-span-full md:col-span-1 lg:col-span-1">
-                <div className="flex flex-col items-center justify-center min-h-[300px] text-center border-2 border-dashed border-muted rounded-lg">
-                  <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-                    <svg
-                      className="w-6 h-6 text-muted-foreground"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    More Tools Coming Soon
-                  </h3>
-                  <p className="text-muted-foreground text-sm max-w-sm">
-                    Additional lead sourcing and prospecting tools will be available here.
-                  </p>
-                </div>
-              </div>
+              <LinkedInPostCard onPostProcessed={handlePostProcessed} />
             </div>
 
             {/* Job Progress Tracking Section */}
