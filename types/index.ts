@@ -17,6 +17,8 @@ export interface Lead {
   organizationEstimatedNumEmployees?: number
   organizationWebsiteUrl?: string
   organizationLinkedinUrl?: string
+  sentToLemlist?: boolean
+  sentToLemlistAt?: Date
   createdAt: Date
   updatedAt: Date
 }

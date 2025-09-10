@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { AIAgentCard } from '@/components/sourcing/ai-agent-card'
+import { ManualLeadCard } from '@/components/sourcing/manual-lead-card'
 import { JobProgressTracker } from '@/components/sourcing/job-progress-tracker'
 
 interface SourcingJob {
@@ -47,6 +48,11 @@ export default function SourcingPage() {
     setActiveJobs(prev => [job, ...prev])
   }
 
+  const handleLeadAdded = (linkedinUrl: string) => {
+    console.log('Manual lead added:', linkedinUrl)
+    // TODO: Add any additional logic for handling manual lead addition
+  }
+
   const handleRemoveJob = (jobId: string) => {
     setActiveJobs(prev => prev.filter(job => job.jobId !== jobId))
   }
@@ -88,9 +94,10 @@ export default function SourcingPage() {
             {/* Sourcing Tools Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AIAgentCard onJobCreated={handleJobCreated} />
+              <ManualLeadCard onLeadAdded={handleLeadAdded} />
               
               {/* Placeholder for future sourcing tools */}
-              <div className="col-span-full md:col-span-1 lg:col-span-2">
+              <div className="col-span-full md:col-span-1 lg:col-span-1">
                 <div className="flex flex-col items-center justify-center min-h-[300px] text-center border-2 border-dashed border-muted rounded-lg">
                   <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-4">
                     <svg

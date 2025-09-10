@@ -29,13 +29,15 @@ const statusLabels = {
 }
 
 export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProps) {
-  const truncateText = (text: string, maxLength: number) => {
+  const truncateText = (text: string | null | undefined, maxLength: number) => {
+    if (!text) return ''
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + '...'
   }
 
   const [currentPage, setCurrentPage] = useState(1)
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
+  const [sendingToLemlist, setSendingToLemlist] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'>('all')
@@ -131,6 +133,41 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
       alert('Error rejecting lead. Please try again.')
     } finally {
       setUpdatingLeads(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(leadId)
+        return newSet
+      })
+    }
+  }
+
+  const handleSendToLemlist = async (leadId: string) => {
+    setSendingToLemlist(prev => {
+      const newSet = new Set(prev)
+      newSet.add(leadId)
+      return newSet
+    })
+    
+    try {
+      const response = await fetch(`/api/leads/${leadId}/send-to-lemlist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        alert('Lead successfully sent to lemlist!')
+      } else {
+        console.error('Failed to send lead to lemlist:', result.error)
+        alert(`Failed to send lead to lemlist: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error sending lead to lemlist:', error)
+      alert('Error sending lead to lemlist. Please try again.')
+    } finally {
+      setSendingToLemlist(prev => {
         const newSet = new Set(prev)
         newSet.delete(leadId)
         return newSet
@@ -330,12 +367,12 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                       ) : null}
                       <div className={`w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3 ${lead.photo_url ? 'hidden' : ''}`}>
                         <span className="text-sm font-medium text-primary">
-                          {getInitials(lead.name)}
+                          {getInitials(lead.name || 'Unknown')}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{lead.name}</span>
+                          <span className="text-sm font-medium">{lead.name || 'Unknown'}</span>
                           {lead.linkedin_url && (
                             <a 
                               href={lead.linkedin_url} 
@@ -363,7 +400,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             </span>
                           </div>
                         )}
-                        <div className="text-sm text-muted-foreground">{lead.email}</div>
+                        <div className="text-sm text-muted-foreground">{lead.email || 'No email'}</div>
                       </div>
                     </div>
                   </td>
@@ -384,7 +421,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                         />
                       ) : null}
                       <div className={`w-8 h-8 bg-muted/50 rounded flex items-center justify-center mr-3 text-xs font-medium ${lead.organizationLogoUrl ? 'hidden' : ''}`}>
-                        {getInitials(lead.company)}
+                        {getInitials(lead.company || 'Unknown')}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -414,7 +451,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             </a>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">{lead.industry}</div>
+                        <div className="text-sm text-muted-foreground">{lead.industry || 'Unknown'}</div>
                         {lead.organizationEstimatedNumEmployees && (
                           <div className="text-sm text-muted-foreground">
                             {lead.organizationEstimatedNumEmployees.toLocaleString()} employees
@@ -465,16 +502,38 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                           </Button>
                         </>
                       ) : lead.status === 'verified' ? (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          disabled={updatingLeads.has(lead.id)}
-                          onClick={() => handleStatusUpdate(lead.id, 'enriched')}
-                        >
-                          <Star className="w-4 h-4 mr-1" />
-                          {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
-                        </Button>
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            disabled={updatingLeads.has(lead.id)}
+                            onClick={() => handleStatusUpdate(lead.id, 'enriched')}
+                          >
+                            <Star className="w-4 h-4 mr-1" />
+                            {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
+                          </Button>
+                          {!lead.sentToLemlist && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                              disabled={sendingToLemlist.has(lead.id)}
+                              onClick={() => handleSendToLemlist(lead.id)}
+                            >
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                              </svg>
+                              {sendingToLemlist.has(lead.id) ? 'Sending...' : 'Send to lemlist'}
+                            </Button>
+                          )}
+                          {lead.sentToLemlist && (
+                            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                              ✓ Sent to lemlist
+                            </span>
+                          )}
+                        </>
+                      
                       ) : lead.status === 'enriched' ? (
                         <span className="text-sm text-muted-foreground">Complete</span>
                       ) : lead.status === 'rejected' ? (

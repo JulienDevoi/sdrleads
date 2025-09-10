@@ -36,6 +36,8 @@ export class LeadsService {
         organizationEstimatedNumEmployees: lead.organizationEstimatedNumEmployees,
         organizationWebsiteUrl: lead.organizationWebsiteUrl,
         organizationLinkedinUrl: lead.organizationLinkedinUrl,
+        sentToLemlist: lead.sent_to_lemlist || false,
+        sentToLemlistAt: lead.sent_to_lemlist_at ? new Date(lead.sent_to_lemlist_at) : undefined,
         createdAt: new Date(lead.created_at),
         updatedAt: new Date(lead.updated_at)
       }))
@@ -77,6 +79,8 @@ export class LeadsService {
         organizationEstimatedNumEmployees: data.organizationEstimatedNumEmployees,
         organizationWebsiteUrl: data.organizationWebsiteUrl,
         organizationLinkedinUrl: data.organizationLinkedinUrl,
+        sentToLemlist: data.sent_to_lemlist || false,
+        sentToLemlistAt: data.sent_to_lemlist_at ? new Date(data.sent_to_lemlist_at) : undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }
@@ -147,12 +151,26 @@ export class LeadsService {
 
   static async updateLead(id: string, updates: Partial<Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Lead | null> {
     try {
+      // Convert TypeScript field names to database column names
+      const dbUpdates: any = {
+        updated_at: new Date().toISOString()
+      }
+      
+      // Map TypeScript fields to database columns
+      Object.keys(updates).forEach(key => {
+        const value = updates[key as keyof typeof updates]
+        if (key === 'sentToLemlist') {
+          dbUpdates.sent_to_lemlist = value
+        } else if (key === 'sentToLemlistAt') {
+          dbUpdates.sent_to_lemlist_at = value instanceof Date ? value.toISOString() : value
+        } else {
+          dbUpdates[key] = value
+        }
+      })
+
       const { data, error } = await supabase
         .from('leads')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single()
@@ -181,6 +199,8 @@ export class LeadsService {
         organizationEstimatedNumEmployees: data.organizationEstimatedNumEmployees,
         organizationWebsiteUrl: data.organizationWebsiteUrl,
         organizationLinkedinUrl: data.organizationLinkedinUrl,
+        sentToLemlist: data.sent_to_lemlist || false,
+        sentToLemlistAt: data.sent_to_lemlist_at ? new Date(data.sent_to_lemlist_at) : undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }
