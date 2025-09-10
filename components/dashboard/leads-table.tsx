@@ -41,7 +41,6 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const [sendingToLemlist, setSendingToLemlist] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'>('all')
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'>('all')
   const [countryFilter, setCountryFilter] = useState<'all' | string>('all')
   const [sprintFilter, setSprintFilter] = useState<'all' | 'empty' | string>('all')
   const [removingDuplicates, setRemovingDuplicates] = useState(false)
@@ -49,9 +48,6 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   
   const itemsPerPage = 50
-  
-  // Get unique sources from leads data
-  const availableSources = Array.from(new Set(leads.map(lead => lead.source).filter(Boolean))).sort()
   
   // Get unique countries from leads data
   const availableCountries = Array.from(new Set(leads.map(lead => lead.country).filter(Boolean))).sort()
@@ -62,12 +58,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   // Apply filters
   const filteredLeads = leads.filter(lead => {
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
-    const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter
     const matchesCountry = countryFilter === 'all' || lead.country === countryFilter
     const matchesSprint = sprintFilter === 'all' || 
                          (sprintFilter === 'empty' && (!lead.sprint || lead.sprint.trim() === '')) ||
                          lead.sprint === sprintFilter
-    return matchesStatus && matchesSource && matchesCountry && matchesSprint
+    return matchesStatus && matchesCountry && matchesSprint
   })
   
   const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
@@ -298,25 +293,6 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-muted-foreground">Source:</label>
-              <select 
-                value={sourceFilter} 
-                onChange={(e) => {
-                  setSourceFilter(e.target.value as any)
-                  handleFilterChange()
-                }}
-                className="px-3 py-1 text-sm border rounded-md bg-background"
-              >
-                <option value="all">All Sources</option>
-                {availableSources.map(source => (
-                  <option key={source} value={source}>
-                    {source.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-muted-foreground">Country:</label>
               <select 
                 value={countryFilter} 
@@ -355,13 +331,12 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
               </select>
             </div>
             
-            {(statusFilter !== 'all' || sourceFilter !== 'all' || countryFilter !== 'all' || sprintFilter !== 'all') && (
+            {(statusFilter !== 'all' || countryFilter !== 'all' || sprintFilter !== 'all') && (
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => {
                   setStatusFilter('all')
-                  setSourceFilter('all')
                   setCountryFilter('all')
                   setSprintFilter('all')
                   handleFilterChange()
@@ -390,12 +365,6 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Company
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Source
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Rank
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
@@ -530,12 +499,6 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                         )}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
-                    {lead.source ? lead.source.replace('-', ' ') : 'Unknown'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                    {lead.rank || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span

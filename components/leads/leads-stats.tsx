@@ -1,4 +1,4 @@
-import { Users, CheckCircle, Clock, Star } from 'lucide-react'
+import { Users, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Lead } from '@/types'
 
@@ -11,7 +11,7 @@ export function LeadsStats({ leads }: LeadsStatsProps) {
     total: leads.length,
     sourced: leads.filter(lead => lead.status === 'sourced').length,
     verified: leads.filter(lead => lead.status === 'verified').length,
-    enriched: leads.filter(lead => lead.status === 'enriched').length,
+    rejected: leads.filter(lead => lead.status === 'rejected').length,
   }
 
   const statCards = [
@@ -37,11 +37,11 @@ export function LeadsStats({ leads }: LeadsStatsProps) {
       color: 'text-green-600'
     },
     {
-      title: 'Enriched',
-      value: stats.enriched,
-      icon: <Star className="w-5 h-5 text-purple-600" />,
-      iconColor: 'bg-purple-100',
-      color: 'text-purple-600'
+      title: 'Rejected',
+      value: stats.rejected,
+      icon: <XCircle className="w-5 h-5 text-red-600" />,
+      iconColor: 'bg-red-100',
+      color: 'text-red-600'
     },
   ]
 
