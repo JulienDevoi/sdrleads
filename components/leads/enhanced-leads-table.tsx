@@ -324,7 +324,9 @@ export function EnhancedLeadsTable({ leads }: EnhancedLeadsTableProps) {
                     <div className="text-sm font-medium" title={lead.company}>
                       {truncateText(lead.company, 20)}
                     </div>
-                    <div className="text-sm text-muted-foreground">{lead.industry}</div>
+                    <div className="text-sm text-muted-foreground" title={lead.industry}>
+                      {truncateText(lead.industry || 'Unknown', 15)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span

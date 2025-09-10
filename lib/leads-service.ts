@@ -2,12 +2,25 @@ import { supabase, supabaseAdmin } from './supabase'
 import { Lead } from '@/types'
 
 export class LeadsService {
-  static async getAllLeads(): Promise<Lead[]> {
+  static async getAllLeads(sprintFilter?: string): Promise<Lead[]> {
     try {
-      const { data, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
+      
+      // Apply sprint filter if provided
+      if (sprintFilter && sprintFilter !== 'all') {
+        if (sprintFilter === 'empty') {
+          // Filter for leads with empty or null sprint
+          query = query.or('Sprint.is.null,Sprint.eq.')
+        } else {
+          // Filter for specific sprint value
+          query = query.eq('Sprint', sprintFilter)
+        }
+      }
+      
+      const { data, error } = await query
 
       if (error) {
         console.error('Error fetching leads:', error)
@@ -25,6 +38,7 @@ export class LeadsService {
         industry: lead.industry || 'Unknown',
         status: lead.status,
         source: lead.source,
+        sprint: lead.Sprint, // Note: database column is 'Sprint' with capital S
         rank: lead.rank,
         country: lead.country,
         city: lead.city,

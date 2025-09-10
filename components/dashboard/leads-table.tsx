@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin, MoreHorizontal, Mail } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -43,7 +43,10 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   const [statusFilter, setStatusFilter] = useState<'all' | 'sourced' | 'verified' | 'enriched' | 'rejected'>('all')
   const [sourceFilter, setSourceFilter] = useState<'all' | 'website' | 'linkedin' | 'referral' | 'cold-call' | 'email' | 'Apollo'>('all')
   const [countryFilter, setCountryFilter] = useState<'all' | string>('all')
+  const [sprintFilter, setSprintFilter] = useState<'all' | 'empty' | string>('all')
   const [removingDuplicates, setRemovingDuplicates] = useState(false)
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   
   const itemsPerPage = 50
   
@@ -53,12 +56,18 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   // Get unique countries from leads data
   const availableCountries = Array.from(new Set(leads.map(lead => lead.country).filter(Boolean))).sort()
   
+  // Get unique sprints from leads data
+  const availableSprints = Array.from(new Set(leads.map(lead => lead.sprint).filter(Boolean))).sort()
+  
   // Apply filters
   const filteredLeads = leads.filter(lead => {
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
     const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter
     const matchesCountry = countryFilter === 'all' || lead.country === countryFilter
-    return matchesStatus && matchesSource && matchesCountry
+    const matchesSprint = sprintFilter === 'all' || 
+                         (sprintFilter === 'empty' && (!lead.sprint || lead.sprint.trim() === '')) ||
+                         lead.sprint === sprintFilter
+    return matchesStatus && matchesSource && matchesCountry && matchesSprint
   })
   
   const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
@@ -69,6 +78,32 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   // Reset to page 1 when filters change
   const handleFilterChange = () => {
     setCurrentPage(1)
+  }
+
+  const toggleDropdown = (leadId: string) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(leadId)) {
+        newSet.delete(leadId)
+      } else {
+        newSet.clear() // Close other dropdowns
+        newSet.add(leadId)
+      }
+      return newSet
+    })
+  }
+
+  const closeDropdown = (leadId: string) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(leadId)
+      return newSet
+    })
+  }
+
+  const handleFindEmail = (leadId: string) => {
+    closeDropdown(leadId)
+    setShowComingSoonModal(true)
   }
 
   const handleStatusUpdate = async (leadId: string, newStatus: 'verified' | 'enriched') => {
@@ -142,6 +177,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   }
 
   const handleSendToLemlist = async (leadId: string) => {
+    closeDropdown(leadId) // Close dropdown when action is triggered
     setSendingToLemlist(prev => {
       const newSet = new Set(prev)
       newSet.add(leadId)
@@ -206,7 +242,8 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -298,7 +335,27 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
               </select>
             </div>
             
-            {(statusFilter !== 'all' || sourceFilter !== 'all' || countryFilter !== 'all') && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-muted-foreground">Sprint:</label>
+              <select 
+                value={sprintFilter} 
+                onChange={(e) => {
+                  setSprintFilter(e.target.value)
+                  handleFilterChange()
+                }}
+                className="px-3 py-1 text-sm border rounded-md bg-background"
+              >
+                <option value="all">All Sprints</option>
+                <option value="empty">No Sprint</option>
+                {availableSprints.map(sprint => (
+                  <option key={sprint} value={sprint}>
+                    {sprint}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {(statusFilter !== 'all' || sourceFilter !== 'all' || countryFilter !== 'all' || sprintFilter !== 'all') && (
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -306,6 +363,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                   setStatusFilter('all')
                   setSourceFilter('all')
                   setCountryFilter('all')
+                  setSprintFilter('all')
                   handleFilterChange()
                 }}
                 className="text-muted-foreground hover:text-foreground"
@@ -395,15 +453,21 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                         {(lead.city || lead.country) && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <MapPin className="w-3 h-3" />
-                            <span>
-                              {lead.city && lead.country 
-                                ? `${lead.city}, ${lead.country}`
-                                : lead.city || lead.country
-                              }
+                            <span title={lead.city && lead.country 
+                              ? `${lead.city}, ${lead.country}`
+                              : lead.city || lead.country}>
+                              {truncateText(
+                                lead.city && lead.country 
+                                  ? `${lead.city}, ${lead.country}`
+                                  : lead.city || lead.country,
+                                20
+                              )}
                             </span>
                           </div>
                         )}
-                        <div className="text-sm text-muted-foreground">{lead.email || 'No email'}</div>
+                        <div className="text-sm text-muted-foreground" title={lead.email}>
+                          {truncateText(lead.email || 'No email', 20)}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -456,7 +520,9 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             </a>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">{lead.industry || 'Unknown'}</div>
+                        <div className="text-sm text-muted-foreground" title={lead.industry}>
+                          {truncateText(lead.industry || 'Unknown', 15)}
+                        </div>
                         {lead.organizationEstimatedNumEmployees && (
                           <div className="text-sm text-muted-foreground">
                             {lead.organizationEstimatedNumEmployees.toLocaleString()} employees
@@ -507,37 +573,60 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                           </Button>
                         </>
                       ) : lead.status === 'verified' ? (
-                        <>
+                        <div className="relative">
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            disabled={updatingLeads.has(lead.id)}
-                            onClick={() => handleStatusUpdate(lead.id, 'enriched')}
+                            className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                            onClick={() => toggleDropdown(lead.id)}
                           >
-                            <Star className="w-4 h-4 mr-1" />
-                            {updatingLeads.has(lead.id) ? 'Enriching...' : 'Enrich'}
+                            <MoreHorizontal className="w-4 h-4" />
                           </Button>
-                          {!lead.sentToLemlist && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                              disabled={sendingToLemlist.has(lead.id)}
-                              onClick={() => handleSendToLemlist(lead.id)}
-                            >
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                              </svg>
-                              {sendingToLemlist.has(lead.id) ? 'Sending...' : 'Send to lemlist'}
-                            </Button>
+                          
+                          {openDropdowns.has(lead.id) && (
+                            <>
+                              <div 
+                                className="fixed inset-0 z-10" 
+                                onClick={() => closeDropdown(lead.id)}
+                              />
+                              <div className="absolute right-0 top-8 z-20 w-80 bg-white rounded-md shadow-lg border border-gray-200 py-1">
+                                {!lead.email && (
+                                  <button
+                                    onClick={() => handleFindEmail(lead.id)}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                  >
+                                    <Mail className="w-4 h-4 mr-2" />
+                                    Find email
+                                  </button>
+                                )}
+                                {!lead.sentToLemlist && (
+                                  <button
+                                    onClick={() => handleSendToLemlist(lead.id)}
+                                    disabled={sendingToLemlist.has(lead.id)}
+                                    className="w-full text-left px-4 py-3 text-sm text-purple-600 hover:bg-purple-50 flex items-start disabled:opacity-50"
+                                  >
+                                    <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                    <span className="leading-tight break-words">
+                                      {sendingToLemlist.has(lead.id) ? 'Sending...' : 'Send to Web3 Finance Club (lemlist)'}
+                                    </span>
+                                  </button>
+                                )}
+                                {lead.sentToLemlist && (
+                                  <div className="px-4 py-3 text-sm text-purple-600 flex items-start">
+                                    <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="leading-tight break-words">
+                                      Sent to Web3 Finance Club
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </>
                           )}
-                          {lead.sentToLemlist && (
-                            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                              ✓ Sent to lemlist
-                            </span>
-                          )}
-                        </>
+                        </div>
                       
                       ) : lead.status === 'enriched' ? (
                         <span className="text-sm text-muted-foreground">Complete</span>
@@ -659,5 +748,31 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
         </div>
       </CardContent>
     </Card>
+
+    {/* Coming Soon Modal */}
+    {showComingSoonModal && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-xl border max-w-md w-full mx-4 p-6">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+              <Mail className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Find Email Feature
+            </h3>
+            <p className="text-gray-600 mb-6">
+              This feature is coming soon! We're working on integrating email finding capabilities to help you discover contact information for your leads.
+            </p>
+            <Button
+              onClick={() => setShowComingSoonModal(false)}
+              className="w-full"
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }

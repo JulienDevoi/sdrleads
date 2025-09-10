@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server'
 import { LeadsService } from '@/lib/leads-service'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     console.log('Fetching leads from database...')
-    const leads = await LeadsService.getAllLeads()
-    console.log(`Found ${leads.length} leads`)
+    
+    // Get sprint filter from URL parameters
+    const { searchParams } = new URL(request.url)
+    const sprintFilter = searchParams.get('sprint')
+    
+    const leads = await LeadsService.getAllLeads(sprintFilter || undefined)
+    console.log(`Found ${leads.length} leads${sprintFilter ? ` (filtered by sprint: ${sprintFilter})` : ''}`)
     return NextResponse.json(leads)
   } catch (error) {
     console.error('API Error - GET /api/leads:', error)
