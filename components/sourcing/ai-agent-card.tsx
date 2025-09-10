@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -95,9 +96,11 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
       >
         <CardHeader className="text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto p-2">
-            <img
+            <Image
               src="/apollo.png"
               alt="Apollo AI"
+              width={64}
+              height={64}
               className="w-full h-full object-contain"
             />
           </div>

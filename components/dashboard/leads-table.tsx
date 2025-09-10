@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -352,9 +353,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {lead.photo_url ? (
-                        <img 
+                        <Image 
                           src={lead.photo_url} 
                           alt={lead.name}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full mr-3 object-cover"
                           onError={(e) => {
                             // Fallback to initials if image fails to load
@@ -407,9 +410,11 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {lead.organizationLogoUrl ? (
-                        <img 
+                        <Image 
                           src={lead.organizationLogoUrl} 
                           alt={`${lead.company} logo`}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded mr-3 object-contain bg-gray-50"
                           onError={(e) => {
                             // Fallback to company initials if logo fails to load

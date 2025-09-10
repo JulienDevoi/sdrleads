@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { 
   Users, 
@@ -60,9 +61,11 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="flex h-16 items-center justify-between px-6 border-b">
             <Link href="/" className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-lg overflow-hidden">
-                <img 
+                <Image 
                   src="/picture.jpg" 
                   alt="LeadGen CRM"
+                  width={32}
+                  height={32}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -105,9 +108,11 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="p-4 border-t">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full overflow-hidden">
-                <img 
+                <Image 
                   src="/picture.jpg" 
                   alt="Request Finance"
+                  width={32}
+                  height={32}
                   className="w-full h-full object-cover"
                 />
               </div>

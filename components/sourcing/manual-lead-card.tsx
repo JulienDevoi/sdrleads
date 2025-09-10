@@ -155,7 +155,7 @@ export function ManualLeadCard({ onLeadAdded }: ManualLeadCardProps) {
             
             <div className="bg-muted/50 p-3 rounded-md">
               <p className="text-xs text-muted-foreground">
-                <strong>Tip:</strong> Copy the LinkedIn profile URL from your browser's address bar when viewing someone's profile.
+                <strong>Tip:</strong> Copy the LinkedIn profile URL from your browser&apos;s address bar when viewing someone&apos;s profile.
               </p>
             </div>
           </div>
