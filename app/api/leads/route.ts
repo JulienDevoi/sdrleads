@@ -3,14 +3,18 @@ import { LeadsService } from '@/lib/leads-service'
 
 export async function GET(request: Request) {
   try {
-    console.log('Fetching leads from database...')
+    // Reduced logging to minimize terminal noise
+    // console.log('Fetching leads from database...')
     
     // Get sprint filter from URL parameters
     const { searchParams } = new URL(request.url)
     const sprintFilter = searchParams.get('sprint')
     
     const leads = await LeadsService.getAllLeads(sprintFilter || undefined)
-    console.log(`Found ${leads.length} leads${sprintFilter ? ` (filtered by sprint: ${sprintFilter})` : ''}`)
+    // Only log when there's a filter applied or significant change
+    if (sprintFilter && sprintFilter !== 'all') {
+      console.log(`Found ${leads.length} leads (filtered by sprint: ${sprintFilter})`)
+    }
     return NextResponse.json(leads)
   } catch (error) {
     console.error('API Error - GET /api/leads:', error)

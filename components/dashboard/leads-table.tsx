@@ -398,6 +398,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                           width={32}
                           height={32}
                           className="w-8 h-8 rounded-full mr-3 object-cover"
+                          unoptimized={true}
                           onError={(e) => {
                             // Fallback to initials if image fails to load
                             const target = e.target as HTMLImageElement;
@@ -461,6 +462,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                           width={32}
                           height={32}
                           className="w-8 h-8 rounded mr-3 object-contain bg-gray-50"
+                          unoptimized={true}
                           onError={(e) => {
                             // Fallback to company initials if logo fails to load
                             const target = e.target as HTMLImageElement;

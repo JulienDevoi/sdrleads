@@ -27,7 +27,7 @@ export class LeadsService {
         throw error
       }
 
-      console.log(`Found ${data.length} leads`)
+      // console.log(`Found ${data.length} leads`) // Reduced logging
       
       // Transform the data to match our Lead interface
       return data.map(lead => ({
