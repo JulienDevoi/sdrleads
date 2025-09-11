@@ -10,6 +10,7 @@ interface LeadSourcingFormData {
   jobTitle: string
   keywords: string
   location: string
+  industry: string
   numberOfLeads: number
 }
 
@@ -23,12 +24,37 @@ interface AIAgentCardProps {
   onJobCreated: (job: SourcingJob) => void
 }
 
+// Apollo industry codes mapping
+const APOLLO_INDUSTRIES = [
+  { name: 'All Industries', code: '' },
+  { name: 'Pharmaceuticals', code: '5567e0eb73696410e4bd1200' },
+  { name: 'Technology', code: '5567cdbb7369640a984e5700' },
+  { name: 'Healthcare', code: '5567cdbb7369640a984e5701' },
+  { name: 'Financial Services', code: '5567cdbb7369640a984e5702' },
+  { name: 'Manufacturing', code: '5567cdbb7369640a984e5703' },
+  { name: 'Retail', code: '5567cdbb7369640a984e5704' },
+  { name: 'Real Estate', code: '5567cdbb7369640a984e5705' },
+  { name: 'Education', code: '5567cdbb7369640a984e5706' },
+  { name: 'Consulting', code: '5567cdbb7369640a984e5707' },
+  { name: 'Marketing & Advertising', code: '5567cdbb7369640a984e5708' },
+  { name: 'Software', code: '5567cdbb7369640a984e5709' },
+  { name: 'E-commerce', code: '5567cdbb7369640a984e570a' },
+  { name: 'Automotive', code: '5567cdbb7369640a984e570b' },
+  { name: 'Food & Beverage', code: '5567cdbb7369640a984e570c' },
+  { name: 'Media & Entertainment', code: '5567cdbb7369640a984e570d' },
+  { name: 'Non-profit', code: '5567cdbb7369640a984e570e' },
+  { name: 'Government', code: '5567cdbb7369640a984e570f' },
+  { name: 'Legal', code: '5567cdbb7369640a984e5710' },
+  { name: 'Transportation', code: '5567cdbb7369640a984e5711' }
+]
+
 export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [formData, setFormData] = useState<LeadSourcingFormData>({
     jobTitle: '',
     keywords: '',
     location: '',
+    industry: '',
     numberOfLeads: 500
   })
 
@@ -84,6 +110,7 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
       jobTitle: '',
       keywords: '',
       location: '',
+      industry: '',
       numberOfLeads: 500
     })
   }
@@ -186,6 +213,24 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="industry" className="text-sm font-medium text-foreground">
+                Industry <span className="text-muted-foreground font-normal">(optional)</span>
+              </label>
+              <select
+                id="industry"
+                value={formData.industry}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-white"
+              >
+                {APOLLO_INDUSTRIES.map(industry => (
+                  <option key={industry.code} value={industry.code}>
+                    {industry.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 interface JobStatus {
   jobId: string
-  status: 'READY' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'TIMED-OUT' | 'ABORTED'
+  status: 'READY' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'TIMED-OUT' | 'ABORTED' | 'PENDING'
   startedAt: string
   finishedAt?: string
   duration: number
@@ -47,9 +47,16 @@ export function JobProgressTracker({ jobs, onRemoveJob, onRetrieveResults }: Job
       setIsPolling(true)
       
       for (const job of jobs) {
-        // Skip if job is already completed
+        // Skip if job is already completed - be more aggressive about this
         const currentStatus = jobStatuses[job.jobId]
         if (currentStatus && ['SUCCEEDED', 'FAILED', 'TIMED-OUT', 'ABORTED'].includes(currentStatus.status)) {
+          console.log(`Skipping completed job ${job.jobId} with status ${currentStatus.status}`)
+          continue
+        }
+        
+        // Also skip if job status from the job object itself shows completed
+        if (job.status && ['SUCCEEDED', 'FAILED', 'TIMED-OUT', 'ABORTED'].includes(job.status.status)) {
+          console.log(`Skipping completed job ${job.jobId} with status ${job.status.status} from job object`)
           continue
         }
 
@@ -58,6 +65,12 @@ export function JobProgressTracker({ jobs, onRemoveJob, onRetrieveResults }: Job
           const result = await response.json()
           
           if (response.ok && result.success) {
+            // Only log status changes, not every poll to reduce noise
+            const prevStatus = jobStatuses[job.jobId]?.status
+            if (!prevStatus || prevStatus !== result.job.status) {
+              console.log(`Job ${job.jobId} status: ${prevStatus || 'unknown'} → ${result.job.status}`)
+            }
+            
             setJobStatuses(prev => ({
               ...prev,
               [job.jobId]: result.job
@@ -74,20 +87,21 @@ export function JobProgressTracker({ jobs, onRemoveJob, onRetrieveResults }: Job
     // Poll immediately
     pollJobs()
 
-    // Set up interval for active jobs
+    // Set up interval for active jobs only
     const activeJobs = jobs.filter(job => {
       const status = jobStatuses[job.jobId]
-      return !status || ['READY', 'RUNNING'].includes(status.status)
+      return !status || ['READY', 'RUNNING', 'PENDING'].includes(status.status)
     })
 
     if (activeJobs.length > 0) {
-      const interval = setInterval(pollJobs, 5000) // Poll every 5 seconds
+      const interval = setInterval(pollJobs, 10000) // Poll every 10 seconds (reduced frequency)
       return () => clearInterval(interval)
     }
   }, [jobs, jobStatuses])
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'PENDING': return 'text-purple-600 bg-purple-100'
       case 'READY': return 'text-yellow-600 bg-yellow-100'
       case 'RUNNING': return 'text-blue-600 bg-blue-100'
       case 'SUCCEEDED': return 'text-green-600 bg-green-100'

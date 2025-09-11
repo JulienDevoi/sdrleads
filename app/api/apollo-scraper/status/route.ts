@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
     const statusData = await response.json()
     const run = statusData.data
 
-    console.log('Apify run data:', JSON.stringify(run, null, 2))
+    // Only log status changes to reduce noise
+    // console.log('Apify run data:', JSON.stringify(run, null, 2))
 
     // Get leads count from multiple possible sources
     let leadsFound = 0
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
         if (datasetResponse.ok) {
           const datasetData = await datasetResponse.json()
           leadsFound = Array.isArray(datasetData) ? datasetData.length : 0
-          console.log('Got leads count from dataset:', leadsFound)
+          // console.log('Got leads count from dataset:', leadsFound)
         }
       } catch (error) {
         console.error('Error fetching dataset count:', error)

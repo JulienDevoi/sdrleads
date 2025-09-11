@@ -5,10 +5,11 @@ interface ApolloScrapingRequest {
   jobTitle: string
   keywords: string
   location: string
+  industry: string
   numberOfLeads: number
 }
 
-function constructApolloSearchUrl(jobTitle: string, keywords: string, location: string): string {
+function constructApolloSearchUrl(jobTitle: string, keywords: string, location: string, industry: string): string {
   const baseUrl = 'https://app.apollo.io/#/people'
   const params = new URLSearchParams({
     sortByField: 'recommendations_score',
@@ -20,6 +21,11 @@ function constructApolloSearchUrl(jobTitle: string, keywords: string, location: 
   // Add location if provided
   if (location && location.trim()) {
     params.append('personLocations[]', location.trim())
+  }
+
+  // Add industry if provided
+  if (industry && industry.trim()) {
+    params.append('organizationIndustryTagIds[]', industry.trim())
   }
 
   // Add job title (required)
@@ -42,7 +48,7 @@ function constructApolloSearchUrl(jobTitle: string, keywords: string, location: 
 export async function POST(request: NextRequest) {
   try {
     const body: ApolloScrapingRequest = await request.json()
-    const { jobTitle, keywords, location, numberOfLeads } = body
+    const { jobTitle, keywords, location, industry, numberOfLeads } = body
 
     // Validate required fields
     if (!jobTitle || !numberOfLeads) {
@@ -53,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct the Apollo search URL
-    const searchUrl = constructApolloSearchUrl(jobTitle, keywords, location)
+    const searchUrl = constructApolloSearchUrl(jobTitle, keywords, location, industry)
     
     console.log('Constructed Apollo Search URL:', searchUrl)
 
@@ -118,6 +124,8 @@ export async function POST(request: NextRequest) {
       job_title: jobTitle,
       keywords: keywords,
       location: location,
+      // Note: industry column doesn't exist in sourcing_jobs table yet
+      // industry: industry,
       number_of_leads: numberOfLeads,
       apollo_search_url: searchUrl,
       apify_payload: apifyPayload,

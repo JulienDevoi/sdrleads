@@ -8,6 +8,19 @@ import { ManualLeadCard } from '@/components/sourcing/manual-lead-card'
 import { LinkedInPostCard } from '@/components/sourcing/linkedin-post-card'
 import { JobProgressTracker } from '@/components/sourcing/job-progress-tracker'
 
+interface JobStatus {
+  jobId: string
+  status: 'READY' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'TIMED-OUT' | 'ABORTED' | 'PENDING'
+  startedAt: string
+  finishedAt?: string
+  duration: number
+  progress: number
+  estimatedLeads: number
+  stats: any
+  defaultDatasetId?: string
+  resultsRetrieved?: boolean
+}
+
 interface SourcingJob {
   jobId: string
   criteria: {
@@ -17,6 +30,7 @@ interface SourcingJob {
     numberOfLeads: number
   }
   startTime: string
+  status?: JobStatus
 }
 
 export default function SourcingPage() {
@@ -31,7 +45,15 @@ export default function SourcingPage() {
         const result = await response.json()
         
         if (response.ok && result.success) {
-          setActiveJobs(result.jobs)
+          // TEMPORARILY: Don't load any historical jobs to stop polling noise
+          // Only show jobs that are actively running (READY, RUNNING, PENDING)
+          const activeJobs = result.jobs.filter((job: SourcingJob) => {
+            const isActive = job.status && ['READY', 'RUNNING', 'PENDING'].includes(job.status.status)
+            return isActive
+          })
+          
+          console.log(`Filtered to ${activeJobs.length} active jobs out of ${result.jobs.length} total jobs`)
+          setActiveJobs(activeJobs)
         } else {
           console.error('Failed to load jobs:', result.error)
         }
