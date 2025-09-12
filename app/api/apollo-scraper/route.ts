@@ -6,10 +6,11 @@ interface ApolloScrapingRequest {
   keywords: string
   location: string
   industry: string
+  employeeRanges: string[]
   numberOfLeads: number
 }
 
-function constructApolloSearchUrl(jobTitle: string, keywords: string, location: string, industry: string): string {
+function constructApolloSearchUrl(jobTitle: string, keywords: string, location: string, industry: string, employeeRanges: string[]): string {
   const baseUrl = 'https://app.apollo.io/#/people'
   const params = new URLSearchParams({
     sortByField: 'recommendations_score',
@@ -26,6 +27,15 @@ function constructApolloSearchUrl(jobTitle: string, keywords: string, location: 
   // Add industry if provided
   if (industry && industry.trim()) {
     params.append('organizationIndustryTagIds[]', industry.trim())
+  }
+
+  // Add employee ranges if provided
+  if (employeeRanges && employeeRanges.length > 0) {
+    employeeRanges.forEach(range => {
+      if (range && range.trim()) {
+        params.append('organizationNumEmployeesRanges[]', range.trim())
+      }
+    })
   }
 
   // Add job title (required)
@@ -48,7 +58,7 @@ function constructApolloSearchUrl(jobTitle: string, keywords: string, location: 
 export async function POST(request: NextRequest) {
   try {
     const body: ApolloScrapingRequest = await request.json()
-    const { jobTitle, keywords, location, industry, numberOfLeads } = body
+    const { jobTitle, keywords, location, industry, employeeRanges, numberOfLeads } = body
 
     // Validate required fields
     if (!jobTitle || !numberOfLeads) {
@@ -59,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct the Apollo search URL
-    const searchUrl = constructApolloSearchUrl(jobTitle, keywords, location, industry)
+    const searchUrl = constructApolloSearchUrl(jobTitle, keywords, location, industry, employeeRanges || [])
     
     console.log('Constructed Apollo Search URL:', searchUrl)
 

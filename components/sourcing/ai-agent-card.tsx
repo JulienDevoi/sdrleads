@@ -11,6 +11,7 @@ interface LeadSourcingFormData {
   keywords: string
   location: string
   industry: string
+  employeeRanges: string[]
   numberOfLeads: number
 }
 
@@ -48,6 +49,21 @@ const APOLLO_INDUSTRIES = [
   { name: 'Transportation', code: '5567cdbb7369640a984e5711' }
 ]
 
+// Apollo employee ranges mapping
+const APOLLO_EMPLOYEE_RANGES = [
+  { label: '1-10', value: '1,10' },
+  { label: '11-20', value: '11,20' },
+  { label: '21-50', value: '21,50' },
+  { label: '51-100', value: '51,100' },
+  { label: '101-200', value: '101,200' },
+  { label: '201-500', value: '201,500' },
+  { label: '501-1000', value: '501,1000' },
+  { label: '1001-2000', value: '1001,2000' },
+  { label: '2001-5000', value: '2001,5000' },
+  { label: '5001-10000', value: '5001,10000' },
+  { label: '10001+', value: '10001,' }
+]
+
 export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [formData, setFormData] = useState<LeadSourcingFormData>({
@@ -55,6 +71,7 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
     keywords: '',
     location: '',
     industry: '',
+    employeeRanges: [],
     numberOfLeads: 500
   })
 
@@ -62,6 +79,15 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }))
+  }
+
+  const handleEmployeeRangeChange = (rangeValue: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      employeeRanges: checked 
+        ? [...prev.employeeRanges, rangeValue]
+        : prev.employeeRanges.filter(range => range !== rangeValue)
     }))
   }
 
@@ -111,6 +137,7 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
       keywords: '',
       location: '',
       industry: '',
+      employeeRanges: [],
       numberOfLeads: 500
     })
   }
@@ -231,6 +258,30 @@ export function AIAgentCard({ onJobCreated }: AIAgentCardProps) {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Company Size <span className="text-muted-foreground font-normal">(optional)</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border border-input rounded-md p-2">
+                {APOLLO_EMPLOYEE_RANGES.map(range => (
+                  <label key={range.value} className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.employeeRanges.includes(range.value)}
+                      onChange={(e) => handleEmployeeRangeChange(range.value, e.target.checked)}
+                      className="rounded border-input text-primary focus:ring-primary focus:ring-offset-0 focus:ring-1"
+                    />
+                    <span>{range.label} employees</span>
+                  </label>
+                ))}
+              </div>
+              {formData.employeeRanges.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Selected: {formData.employeeRanges.length} range{formData.employeeRanges.length !== 1 ? 's' : ''}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
