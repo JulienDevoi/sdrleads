@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin, MoreHorizontal, Mail, MessageSquare } from 'lucide-react'
+import { Filter, CheckCircle, Star, Linkedin, ExternalLink, ChevronDown, X, Search, UserX, XCircle, MapPin, MoreHorizontal, Mail, MessageSquare, Copy } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Lead } from '@/types'
@@ -36,6 +36,23 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
     return text.substring(0, maxLength) + '...'
   }
 
+  const copyToClipboard = async (text: string, type: string = 'text') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      // You could add a toast notification here if you have one
+      console.log(`${type} copied to clipboard:`, text)
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err)
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+    }
+  }
+
   const [currentPage, setCurrentPage] = useState(1)
   const [updatingLeads, setUpdatingLeads] = useState<Set<string>>(new Set())
   const [sendingToLemlist, setSendingToLemlist] = useState<Set<string>>(new Set())
@@ -57,7 +74,18 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
   // Get unique sprints from leads data
   const availableSprints = Array.from(new Set(leads.map(lead => lead.sprint).filter(Boolean))).sort()
   
-  // Apply filters
+  // Define status priority (rejected should be last)
+  const getStatusPriority = (status: string) => {
+    const priorities: { [key: string]: number } = {
+      'sourced': 1,
+      'verified': 2,
+      'enriched': 3,
+      'rejected': 4  // Rejected appears last
+    }
+    return priorities[status] || 5
+  }
+
+  // Apply filters and sorting
   const filteredLeads = leads.filter(lead => {
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
     const matchesCountry = countryFilter === 'all' || lead.country === countryFilter
@@ -65,6 +93,14 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                          (sprintFilter === 'empty' && (!lead.sprint || lead.sprint.trim() === '')) ||
                          lead.sprint === sprintFilter
     return matchesStatus && matchesCountry && matchesSprint
+  }).sort((a, b) => {
+    // Primary sort: by status priority (rejected last)
+    const statusDiff = getStatusPriority(a.status) - getStatusPriority(b.status)
+    if (statusDiff !== 0) return statusDiff
+    
+    // Secondary sort: by creation date (newest first) - assuming leads have a created_at or similar field
+    // Since we don't have created_at in the Lead interface, we'll use the array order as fallback
+    return 0
   })
   
   const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
@@ -388,7 +424,7 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
             </thead>
             <tbody className="bg-background divide-y divide-border">
               {currentLeads.map((lead) => (
-                <tr key={lead.id} className="hover:bg-muted/50 transition-colors">
+                <tr key={lead.id} className="group hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {lead.photo_url ? (
@@ -447,8 +483,22 @@ export function LeadsTable({ leads, onLeadUpdate, onLeadDelete }: LeadsTableProp
                             </span>
                           </div>
                         )}
-                        <div className="text-sm text-muted-foreground" title={lead.email}>
-                          {truncateText(lead.email || 'No email', 20)}
+                        <div className="flex items-center gap-1">
+                          <div className="text-sm text-muted-foreground" title={lead.email}>
+                            {truncateText(lead.email || 'No email', 20)}
+                          </div>
+                          {lead.email && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                copyToClipboard(lead.email, 'Email')
+                              }}
+                              className="p-1 hover:bg-muted rounded transition-colors opacity-0 group-hover:opacity-100"
+                              title="Copy email"
+                            >
+                              <Copy className="w-3 h-3 text-muted-foreground hover:text-foreground" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
